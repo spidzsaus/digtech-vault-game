@@ -1,15 +1,25 @@
+using GameComponents;
+
 namespace digtech_vault_game;
 
 static class Program
 {
-    /// <summary>
-    ///  The main entry point for the application.
-    /// </summary>
     [STAThread]
     static void Main()
     {
-        // To customize application configuration such as set high DPI settings or default font,
-        // see https://aka.ms/applicationconfiguration.
+        GameComponents.AndGate and = new GameComponents.AndGate();
+        GameComponents.CurrentGate curr = new GameComponents.CurrentGate();
+        GameComponents.NotGate not = new GameComponents.NotGate();
+        GameComponents.LogGate log = new GameComponents.LogGate();
+        
+        curr.connect(and, 0, 0);
+        //curr.connect(not, 1, 0);
+        curr.connect(and, 1, 1);
+        and.connect(log, 0, 0);
+        
+        curr.doChainTick();
+
+
         ApplicationConfiguration.Initialize();
         Application.Run(new Form1());
     }    
