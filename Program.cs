@@ -6,33 +6,36 @@ static class Program
 {
     [STAThread]
     static void Main()
-    {
-        GameComponents.AndGate and = new GameComponents.AndGate();
-        GameComponents.CurrentGate curr = new GameComponents.CurrentGate();
-        GameComponents.NotGate not = new GameComponents.NotGate();
-        GameComponents.LogGate log = new GameComponents.LogGate();
-        
-        and.setPosition(2, 1);
-        curr.setPosition(0, 1);
-        not.setPosition(1, 2);
-        log.setPosition(3, 1);
+    {   
+        GameComponents.Scheme mainScheme = new();
 
 
-        curr.connect(and, 0, 0);
-        curr.connect(not, 1, 0);
-        not.connect(and, 0, 1);
-        and.connect(log, 0, 0);
+        GameComponents.DummyInputGate i1 = new();
+        GameComponents.DummyInputGate i2 = new();
+        GameComponents.DummyOutputGate o1 = new();
+        GameComponents.AndGate and = new();
         
-        curr.doChainTick();
+        i1.connect(and, 0, 0);
+        i2.connect(and, 0, 1);
+        and.connect(o1, 0, 0);
+
+        mainScheme.addGate(i1);
+        mainScheme.addGate(i2);
+        mainScheme.addGate(o1);
+        mainScheme.addGate(and);
+
+        mainScheme.compile();
+
+        Console.WriteLine(mainScheme.run(new bool[2] {true, true})[0]);
 
         ApplicationConfiguration.Initialize();
 
         Form1 mainForm = new Form1();
 
+        mainForm.addGate(i1);
+        mainForm.addGate(i2);
+        mainForm.addGate(o1);
         mainForm.addGate(and);
-        mainForm.addGate(curr);
-        mainForm.addGate(not);
-        mainForm.addGate(log);
 
         Application.Run(mainForm);
     }    

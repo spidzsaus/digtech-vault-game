@@ -22,7 +22,7 @@ public partial class Form1 : Form
         base.OnPaint(e);
         foreach (LogiComponent component in this.logiComponents)
         {
-            component.draw(e, 100);
+            component.draw(e, 10, 10, 100f);
         }
 
     }
