@@ -2,7 +2,6 @@ using GameComponents;
 
 namespace LogiWidgets;
 
-
 public class LogiComponent {
     BaseGate reference;
 
@@ -14,4 +13,29 @@ public class LogiComponent {
         this.reference.draw(e, x, y, scale, DrawStandart.IEC);
     }
 
+}
+
+public class LevelViewer : Panel {
+    Level level;
+    int XShift;
+    int YShift;
+    int scale;
+    DrawStandart standart;
+
+    public LevelViewer(Level level) : base() {
+        this.level = level;
+        this.standart = DrawStandart.IEC;
+    }
+    public void setStandart(DrawStandart standart) {
+        this.standart = standart;
+    }
+
+    protected override void OnPaint(PaintEventArgs e) {
+        base.OnPaint(e);
+        foreach (BaseGate component in this.level.scheme.getGates())
+        {
+            component.draw(e, XShift, YShift, scale, standart);
+        }
+
+    }
 }

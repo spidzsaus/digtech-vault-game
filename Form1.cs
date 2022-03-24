@@ -1,21 +1,20 @@
 namespace digtech_vault_game;
 using LogiWidgets;
 using GameComponents;
+using System;
 
 public partial class Form1 : Form
 {
 
-    List<LogiComponent> logiComponents = new List<LogiComponent>();
-
+    LevelViewer levelViewer;
     public Form1()
     {
         InitializeComponent();
     }
 
-    public LogiComponent addGate(BaseGate gate) {
-        LogiComponent component = new LogiComponent(gate);
-        this.logiComponents.Add(component);
-        return component;
+    public void openLevel(Level level){
+        levelViewer = new(level);
+        this.Controls.Add(levelViewer);
     }
 
     protected override void OnPaint(PaintEventArgs e) {
@@ -25,5 +24,11 @@ public partial class Form1 : Form
             component.draw(e, 10, 10, 100f);
         }
 
+    }
+
+    protected override void OnClick(EventArgs e)
+    {
+        base.OnClick(e);
+        
     }
 }

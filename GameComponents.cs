@@ -1,5 +1,4 @@
 namespace GameComponents;
-
 public class Pipe
 {
     public bool state = false;
@@ -40,7 +39,9 @@ abstract public class BaseGate
     abstract public void IECdraw(PaintEventArgs e, int x, int y, float scale);
     abstract public void ANSIdraw(PaintEventArgs e, int x, int y, float scale);
     public int parentsCount {get { return this.countParents(); } }
-    
+
+    public Scheme Parent;
+    public bool suggestion;
     public int gamefieldX;
     public int gamefieldY;
     public bool is_hidden;
@@ -134,6 +135,8 @@ abstract public class BaseGate
         brush.Dispose();
 
     }
+
+    virtual public void onClick () {}
 
     public void draw(PaintEventArgs e, int x, int y, float scale, DrawStandart drawStandart) {
         if (drawStandart == DrawStandart.IEC) {
@@ -371,7 +374,7 @@ public class DummyInputGate: BaseGate
     }
     public override void IECdraw(PaintEventArgs e, int x, int y, float scale)
     {
-        this.IECDrawTemplate(e, x, y, scale, ">>", true);
+        this.IECDrawTemplate(e, x, y, scale, ">>", false);
     }
 }
 
@@ -389,7 +392,111 @@ public class DummyOutputGate: BaseGate
     }
     public override void IECdraw(PaintEventArgs e, int x, int y, float scale)
     {
-        this.IECDrawTemplate(e, x, y, scale, "<<", true);
+        this.IECDrawTemplate(e, x, y, scale, "<<", false);
+    }
+}
+
+public class LogOutputGate: BaseGate
+{   
+    override public int input_slots {get => 1;}
+    override public int output_slots {get => 0;}
+    override public bool is_output {get => true;}
+    public override bool[] output(bool[] input) {
+        Console.WriteLine(input[0]);
+        return input;
+    }
+    public override void ANSIdraw(PaintEventArgs e, int x, int y, float scale)
+    {
+        throw new NotImplementedException();
+    }
+    public override void IECdraw(PaintEventArgs e, int x, int y, float scale)
+    {
+        this.IECDrawTemplate(e, x, y, scale, "<<", false);
+    }
+}
+
+public class LampOutputGate: BaseGate
+{   
+    override public int input_slots {get => 1;}
+    override public int output_slots {get => 0;}
+    override public bool is_output {get => true;}
+    public override bool[] output(bool[] input) {
+        this.suggestion = input[0];
+        return input;
+    }
+    public override void ANSIdraw(PaintEventArgs e, int x, int y, float scale)
+    {
+        throw new NotImplementedException();
+    }
+    public override void IECdraw(PaintEventArgs e, int x, int y, float scale)
+    {
+        float shift = scale * 1.5f;
+        int componentX = (int)(gamefieldX * shift + x);
+        int componentY = (int)(gamefieldY * shift + y);
+        Pen pen = new Pen(Color.Black);
+        pen.Width = 10;
+        SolidBrush brush;
+        if (this.suggestion) {
+            brush = new SolidBrush(Color.Yellow);
+        } else {
+            brush = new SolidBrush(Color.Gray);
+        }
+
+        e.Graphics.DrawEllipse(pen,
+                                (int)componentX,
+                                (int)componentY + (int)scale * 0.3f,
+                                (int)scale - (int)scale * 0.6f,
+                                (int)scale - (int)scale * 0.6f);
+        e.Graphics.FillEllipse(brush,
+                                (int)componentX,
+                                (int)componentY + (int)scale * 0.3f,
+                                (int)scale - (int)scale * 0.6f,
+                                (int)scale - (int)scale * 0.6f);
+
+        pen.Dispose();
+        brush.Dispose();
+    }
+}
+
+public class ButtonInputGate: BaseGate
+{
+    public Button minionButton;   
+    public ButtonInputGate() : base() {
+        minionButton = new();
+        minionButton.Click += this.clickReaction;
+        minionButton.Text = "0";
+    }
+
+    public void register(Form form) {
+        form.Controls.Add(this.minionButton);
+    }
+
+    void clickReaction(object sender, EventArgs e) {
+        this.suggestion = !this.suggestion;
+        this.Parent.run();
+        if (this.suggestion) {
+            this.minionButton.Text = "1";
+        } else {
+            this.minionButton.Text = "0";
+        }
+        this.minionButton.Parent.Refresh();
+    }
+    override public int input_slots {get => 0;}
+    override public int output_slots {get => 1;}
+    override public bool is_input {get => true;}
+    public override bool[] output(bool[] input) {
+        return input;
+    }
+    public override void ANSIdraw(PaintEventArgs e, int x, int y, float scale)
+    {
+        throw new NotImplementedException();
+    }
+    public override void IECdraw(PaintEventArgs e, int x, int y, float scale)
+    {
+        this.IECDrawTemplate(e, x, y, scale, "", false);
+        this.minionButton.Location = new System.Drawing.Point((int)(x + scale * this.gamefieldX * 1.5f),
+                                                              (int)(y + scale * this.gamefieldY * 1.5f));
+        this.minionButton.Size = new System.Drawing.Size((int)(scale * 0.75f), (int)scale);
     }
 }
 
@@ -398,7 +505,34 @@ public class Scheme {
     List<BaseGate> inputLayer = new List<BaseGate>();
     List<BaseGate> outputLayer = new List<BaseGate>();
     public bool isCompiled = false;
+    public bool isReady = false;
+    public Dictionary<bool[], bool[]>? truthTable;
+
+    public List<BaseGate> getGates() {
+        return this.schemeBody;
+    }
+    public bool[] output(bool[] input) {
+        if (this.isCompiled) {
+            /*int index = 0;
+            for (int i = 1; i <= this.inputLayer.Count; i++)
+            {
+                if (input[i - 1]) {
+                    index = index + (int)(Math.Pow(2, this.inputLayer.Count - i));
+                }
+            } */
+            return this.truthTable![input];
+        } else {
+            return this.run(input);
+        }
+    }
     public void compile() {
+        if (!this.isReady) {
+            this.prepare();
+        }
+        this.truthTable = this.genTruthTable();
+        this.isCompiled = true;
+    }
+    public void prepare() {
         foreach (BaseGate gate in this.schemeBody) {
             if (gate.is_input) {
                 inputLayer.Add(gate);
@@ -408,10 +542,10 @@ public class Scheme {
             }
         }
         this.schemeBody = this.schemeBody.OrderBy(bg => bg.parentsCount).ToList();
-        this.isCompiled = true;
+        this.isReady = true;
     }
 
-    public bool[] run(Boolean[] input) {
+    public bool[] run(bool[] input) {
         for (int i = 0; i < input.Length; i++)
         {
             inputLayer[i].passForced( new bool[1] {input[i]} );
@@ -430,37 +564,60 @@ public class Scheme {
         }
         return output;
     }
+    public bool[] run() {
+        for (int i = 0; i < this.inputLayer.Count; i++)
+        {
+            inputLayer[i].passForced(new bool[1] {inputLayer[i].suggestion});
+        }
+        foreach (BaseGate gate in this.schemeBody)
+        {
+            if (!gate.is_input) {
+                gate.update();
+            }
+            
+        }
+        bool[] output = new bool[this.outputLayer.Count];
+        for (int i = 0; i < this.outputLayer.Count; i++)
+        {
+            output[i] = this.outputLayer[i].update()[0];   
+        }
+        return output;
+    }
+
     public void addGate(BaseGate gate) {
         this.schemeBody.Add(gate);
+        this.isReady = false;
+        gate.Parent = this;
+    }
+
+    public Dictionary<bool[], bool[]> genTruthTable(){
+        int inputSize = this.inputLayer.Count;
+        int outputSize = this.outputLayer.Count;
+        int tableSize = (int)Math.Pow(2, inputSize);
+        Dictionary<bool[], bool[]> output = new();
+        for (int i = 0; i < tableSize; i++)
+        {
+            bool[] key = new bool[inputSize];
+            List<bool> input = new List<bool>();
+            for (int j = inputSize - 1; j >= 0; j--)
+            {
+                int buff = (int)(i / Math.Pow(2, j));  
+                key[j] = (buff % 2) == 1;
+            }
+            output[key] = this.run(input.ToArray());
+        }
+        return output;
     }
 
 
 }
 
+public class Level {
+    public Scheme scheme; 
+    public string levelName;
 
-//TODO
-/*
-public class ButtonGate: BaseGate
-{   
-    override public int input_slots {get => 0;}
-    override public int output_slots {get => 1;}
+    public void gameRender(PaintEventArgs e, int x, int y, float scale) {
 
-    public Button button = new Button();
+    }
 
-    public override ButtonGate() : base BaseGate {
-        
-    }
-    public override bool[] output(bool[] input) {
-        return new bool[1] {!(input[0] ^ input[1])};
-    }
-    public override void ANSIdraw(PaintEventArgs e, int x, int y, float scale)
-    {
-        throw new NotImplementedException();
-    }
-    public override void IECdraw(PaintEventArgs e, int x, int y, float scale)
-    {
-        this.IECDrawTemplate(e, x, y, scale, "=1", true);
-    }
-    
 }
-*/
