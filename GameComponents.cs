@@ -616,8 +616,4 @@ public class Level {
     public Scheme scheme; 
     public string levelName;
 
-    public void gameRender(PaintEventArgs e, int x, int y, float scale) {
-
-    }
-
 }

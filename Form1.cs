@@ -13,17 +13,7 @@ public partial class Form1 : Form
     }
 
     public void openLevel(Level level){
-        levelViewer = new(level);
-        this.Controls.Add(levelViewer);
-    }
-
-    protected override void OnPaint(PaintEventArgs e) {
-        base.OnPaint(e);
-        foreach (LogiComponent component in this.logiComponents)
-        {
-            component.draw(e, 10, 10, 100f);
-        }
-
+        levelViewer.openLevel(level);
     }
 
     protected override void OnClick(EventArgs e)

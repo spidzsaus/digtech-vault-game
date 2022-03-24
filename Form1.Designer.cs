@@ -32,6 +32,11 @@ partial class Form1
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(800, 450);
         this.Text = "Form1";
+        this.levelViewer = new();
+        this.levelViewer.Width = 800;
+        this.levelViewer.Height = 800;
+        this.levelViewer.configure(10, 10, 100);
+        this.Controls.Add(this.levelViewer);
     }
 
     #endregion

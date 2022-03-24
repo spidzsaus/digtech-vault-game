@@ -57,15 +57,10 @@ static class Program
 
         Form1 mainForm = new Form1();
 
-        mainForm.addGate(i1);
-        mainForm.addGate(i2);
-        mainForm.addGate(i3);
-        mainForm.addGate(i4);
-        mainForm.addGate(xor);
-        mainForm.addGate(o1);
-        mainForm.addGate(and);
-        mainForm.addGate(not);
-        mainForm.addGate(xnor);
+        Level mainLevel = new Level();
+        mainLevel.scheme = mainScheme;
+
+        mainForm.openLevel(mainLevel);
 
         i1.register(mainForm);
         i2.register(mainForm);

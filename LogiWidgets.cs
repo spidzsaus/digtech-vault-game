@@ -22,20 +22,29 @@ public class LevelViewer : Panel {
     int scale;
     DrawStandart standart;
 
-    public LevelViewer(Level level) : base() {
-        this.level = level;
+    public LevelViewer() : base() {
         this.standart = DrawStandart.IEC;
+    }
+    public void openLevel(Level level) {
+        this.level = level;
     }
     public void setStandart(DrawStandart standart) {
         this.standart = standart;
     }
 
+    public void configure(int XShift, int YShift, int scale) {
+        this.XShift = XShift;
+        this.YShift = YShift;
+        this.scale = scale;
+    }
+
     protected override void OnPaint(PaintEventArgs e) {
         base.OnPaint(e);
-        foreach (BaseGate component in this.level.scheme.getGates())
-        {
-            component.draw(e, XShift, YShift, scale, standart);
+        if (this.level != null){
+            foreach (BaseGate component in this.level.scheme.getGates())
+            {
+                component.draw(e, XShift, YShift, scale, standart);
+            }
         }
-
     }
 }
