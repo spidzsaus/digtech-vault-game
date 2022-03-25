@@ -33,7 +33,10 @@ public class LevelViewer : Panel {
         int componentX = (int)((mouseX - this.XShift) / (this.scale * 1.5f));
         int componentY = (int)((mouseY - this.YShift) / (this.scale * 1.5f));
         BaseGate? component = this.level.scheme.getComponent(componentX, componentY);
-        if (component != null) component.onClick();
+        if (component != null) { 
+            bool result = component.onClick();
+            if (result) this.Refresh();
+        }
     }
     public void openLevel(Level level) {
         this.level = level;

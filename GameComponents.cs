@@ -136,7 +136,7 @@ abstract public class BaseGate
 
     }
 
-    virtual public void onClick () {}
+    virtual public bool onClick () {return false;}
 
     public void draw(PaintEventArgs e, int x, int y, float scale, DrawStandart drawStandart) {
         if (drawStandart == DrawStandart.IEC) {
@@ -460,9 +460,10 @@ public class LampOutputGate: BaseGate
 
 public class ButtonInputGate: BaseGate
 { 
-    override public void onClick() {
+    override public bool onClick() {
         this.suggestion = !this.suggestion;
         this.Parent.run();
+        return true;
     }
     override public int input_slots {get => 0;}
     override public int output_slots {get => 1;}
