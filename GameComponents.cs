@@ -73,6 +73,7 @@ abstract public class BaseGate
             foreach (Pipe pipe in this.recievers!)
             {
                 if (!(pipe is null)) {
+                pen.Color = pipe.state ? Color.Red : Color.Black;
                 BaseGate pipe_dest = pipe.dest;
                 int lineStartY = (int)(lineStartReferenceY + ((pipe.source_slot + 0.5f) * (scale / this.output_slots)));
                 int lineEndX = x + (int)(pipe_dest.gamefieldX * shift);
@@ -106,6 +107,7 @@ abstract public class BaseGate
             foreach (Pipe pipe in this.recievers!)
             {
                 if (!(pipe is null)) {
+                pen.Color = pipe.state ? Color.Red : Color.Black;
                 BaseGate pipe_dest = pipe.dest;
                 int lineStartY = (int)(lineStartReferenceY + ((pipe.source_slot + 0.5f) * (scale / this.output_slots)));
                 int lineEndX = x + (int)(pipe_dest.gamefieldX * shift);
