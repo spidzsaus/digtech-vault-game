@@ -459,27 +459,10 @@ public class LampOutputGate: BaseGate
 }
 
 public class ButtonInputGate: BaseGate
-{
-    public Button minionButton;   
-    public ButtonInputGate() : base() {
-        minionButton = new();
-        minionButton.Click += this.clickReaction;
-        minionButton.Text = "0";
-    }
-
-    public void register(Form form) {
-        form.Controls.Add(this.minionButton);
-    }
-
-    void clickReaction(object sender, EventArgs e) {
+{ 
+    override public void onClick() {
         this.suggestion = !this.suggestion;
         this.Parent.run();
-        if (this.suggestion) {
-            this.minionButton.Text = "1";
-        } else {
-            this.minionButton.Text = "0";
-        }
-        this.minionButton.Parent.Refresh();
     }
     override public int input_slots {get => 0;}
     override public int output_slots {get => 1;}
@@ -494,9 +477,6 @@ public class ButtonInputGate: BaseGate
     public override void IECdraw(PaintEventArgs e, int x, int y, float scale)
     {
         this.IECDrawTemplate(e, x, y, scale, "", false);
-        this.minionButton.Location = new System.Drawing.Point((int)(x + scale * this.gamefieldX * 1.5f),
-                                                              (int)(y + scale * this.gamefieldY * 1.5f));
-        this.minionButton.Size = new System.Drawing.Size((int)(scale * 0.75f), (int)scale);
     }
 }
 
@@ -507,19 +487,45 @@ public class Scheme {
     public bool isCompiled = false;
     public bool isReady = false;
     public Dictionary<bool[], bool[]>? truthTable;
-
+    private Dictionary<int, Dictionary<int, BaseGate>>? locator;
     public List<BaseGate> getGates() {
         return this.schemeBody;
     }
+    public BaseGate? getComponent(int X, int Y) {
+        if (!this.isReady) {
+            this.prepare();
+        }
+        try
+        {
+            return this.locator[X][Y];
+        }
+        catch (System.Collections.Generic.KeyNotFoundException)
+        {
+            return null;
+        }
+    }
+    public int getRangeX() {
+        int maxX = 0;
+        foreach (BaseGate item in this.schemeBody)
+        {
+            if (item.gamefieldX > maxX) {
+                maxX = item.gamefieldX;
+            }
+        }
+        return maxX;
+    }
+    public int getRangeY() {
+        int maxY = 0;
+        foreach (BaseGate item in this.schemeBody)
+        {
+            if (item.gamefieldY > maxY) {
+                maxY = item.gamefieldY;
+            }
+        }
+        return maxY;
+    }
     public bool[] output(bool[] input) {
         if (this.isCompiled) {
-            /*int index = 0;
-            for (int i = 1; i <= this.inputLayer.Count; i++)
-            {
-                if (input[i - 1]) {
-                    index = index + (int)(Math.Pow(2, this.inputLayer.Count - i));
-                }
-            } */
             return this.truthTable![input];
         } else {
             return this.run(input);
@@ -533,7 +539,12 @@ public class Scheme {
         this.isCompiled = true;
     }
     public void prepare() {
+        this.locator = new();
         foreach (BaseGate gate in this.schemeBody) {
+            if (!this.locator.ContainsKey(gate.gamefieldX)) {
+                this.locator[gate.gamefieldX] = new();
+            }
+            this.locator[gate.gamefieldX][gate.gamefieldY] = gate;
             if (gate.is_input) {
                 inputLayer.Add(gate);
             }

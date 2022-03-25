@@ -62,12 +62,6 @@ static class Program
 
         mainForm.openLevel(mainLevel);
 
-        i1.register(mainForm);
-        i2.register(mainForm);
-        i3.register(mainForm);
-        i4.register(mainForm);
-        
-
         Application.Run(mainForm);
     }    
 }
