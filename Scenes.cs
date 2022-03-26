@@ -4,6 +4,7 @@ using LogiWidgets;
 
 public class SceneManager : Panel {
     Scene? scene;
+    public System.Media.SoundPlayer player;
     public void openScene(Scene scene) {
         if (this.scene is not null) {
             this.scene.close();
@@ -38,6 +39,10 @@ public class GameScene : Scene {
         this.levelViewer.openLevel(this.level);
 
         parent.Controls.Add(this.levelViewer);
+
+        if (parent.player != null) parent.player.Stop();
+        parent.player = new System.Media.SoundPlayer(@"resources/game.wav");
+        parent.player.PlayLooping();
 
 
     }
@@ -76,23 +81,6 @@ public class LevelSelectScene : Scene {
     }
 
 }
-public class TestScene : Scene {
-    LevelViewer levelViewer;
-    public override void init(SceneManager parent)
-    {
-        base.init(parent);
-        
-        Levels.Level mainLevel = new();
-        mainLevel.fromJson(System.IO.File.ReadAllText(@"gamedata/levels/test.json"),
-                           false);
-
-        this.levelViewer = new();
-        this.levelViewer.configure(10, 10, 100);
-        this.levelViewer.openLevel(mainLevel);
-
-        parent.Controls.Add(this.levelViewer);
-    }
-}
 
 public class MenuScene : Scene {
     Button gameStart;
@@ -110,6 +98,9 @@ public class MenuScene : Scene {
         this.exit.Height = 100;
         this.exit.Click += this.exitAction;
         
+        if (parent.player != null) parent.player.Stop();
+        parent.player = new System.Media.SoundPlayer(@"resources/menu.wav");
+        parent.player.PlayLooping();
 
         parent.Controls.Add(gameStart);
         parent.Controls.Add(exit);
