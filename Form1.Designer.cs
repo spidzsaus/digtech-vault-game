@@ -31,12 +31,11 @@ partial class Form1
         this.components = new System.ComponentModel.Container();
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(800, 450);
-        this.Text = "Form1";
-        this.levelViewer = new();
-        this.levelViewer.Width = 800;
-        this.levelViewer.Height = 800;
-        this.levelViewer.configure(10, 10, 100);
-        this.Controls.Add(this.levelViewer);
+        this.Text = "ЦифТех: Взлом Сейфа";
+        this.sceneManager = new();
+        this.sceneManager.Width = 800;
+        this.sceneManager.Height = 450;
+        this.Controls.Add(this.sceneManager);
     }
 
     #endregion

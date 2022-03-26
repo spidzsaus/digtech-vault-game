@@ -54,7 +54,6 @@ public class LevelViewer : Panel {
     }
 
     protected override void OnPaint(PaintEventArgs e) {
-        base.OnPaint(e);
         if (this.level != null){
             foreach (BaseGate component in this.level.scheme.getGates())
             {
@@ -73,5 +72,6 @@ public class LevelViewer : Panel {
                             0,
                             this.Width,
                             this.Height);
+        base.OnPaint(e);
     }
 }

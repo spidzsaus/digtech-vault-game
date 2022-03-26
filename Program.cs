@@ -1,4 +1,5 @@
 using GameComponents;
+using Scenes;
 
 namespace digtech_vault_game;
 
@@ -7,6 +8,7 @@ static class Program
     [STAThread]
     static void Main()
     {   
+        /*
         GameComponents.Scheme mainScheme = new();
         ApplicationConfiguration.Initialize();
 
@@ -62,6 +64,12 @@ static class Program
 
         mainForm.openLevel(mainLevel);
 
+        Application.Run(mainForm);
+        */
+        ApplicationConfiguration.Initialize();
+        Form1 mainForm = new Form1();
+        MenuScene mainMenu = new();
+        mainForm.sceneManager.openScene(mainMenu);
         Application.Run(mainForm);
     }    
 }

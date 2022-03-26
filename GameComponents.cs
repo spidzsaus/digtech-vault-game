@@ -479,7 +479,60 @@ public class ButtonInputGate: BaseGate
     }
     public override void IECdraw(PaintEventArgs e, int x, int y, float scale)
     {
-        this.IECDrawTemplate(e, x, y, scale, "", false);
+        float shift = scale * 1.5f;
+        int componentX = (int)(gamefieldX * shift + x);
+        int componentY = (int)(gamefieldY * shift + y);
+        Pen pen = new Pen(Color.Black);
+        pen.Width = 10;
+        SolidBrush brush;
+        if (this.suggestion) {
+            brush = new SolidBrush(Color.Lime);
+        } else {
+            brush = new SolidBrush(Color.Gray);
+        }
+
+        e.Graphics.DrawEllipse(pen,
+                                (int)componentX,
+                                (int)componentY,
+                                (int)scale,
+                                (int)scale);
+        e.Graphics.FillEllipse(brush,
+                                (int)componentX,
+                                (int)componentY ,
+                                (int)scale,
+                                (int)scale);
+        pen.Width = 3;
+        int lineStartX = (int)(componentX + scale);
+            float lineStartReferenceY = componentY;
+            foreach (Pipe pipe in this.recievers!)
+            {
+                if (!(pipe is null)) {
+                pen.Color = pipe.state ? Color.Red : Color.Black;
+                BaseGate pipe_dest = pipe.dest;
+                int lineStartY = (int)(lineStartReferenceY + ((pipe.source_slot + 0.5f) * (scale / this.output_slots)));
+                int lineEndX = x + (int)(pipe_dest.gamefieldX * shift);
+                int lineEndY = y + (int)(pipe_dest.gamefieldY * shift + (pipe.dest_slot + 0.5f) * (scale / pipe_dest.input_slots));
+                int midX = lineStartX + (lineEndX - lineStartX) / 2;
+                e.Graphics.DrawLine(pen,
+                                    lineStartX,
+                                    lineStartY,
+                                    midX,
+                                    lineStartY);
+                e.Graphics.DrawLine(pen,
+                                    midX,
+                                    lineStartY,
+                                    midX,
+                                    lineEndY);
+                e.Graphics.DrawLine(pen,
+                                    midX,
+                                    lineEndY,
+                                    lineEndX,
+                                    lineEndY);
+                }
+            }
+
+        pen.Dispose();
+        brush.Dispose();
     }
 }
 
