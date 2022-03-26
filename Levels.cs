@@ -28,6 +28,10 @@ public class Level {
     public Scheme scheme; 
     public string levelName;
 
+    public void fromJson(string json) {
+
+    }
+
     public string toJson() {
         Dictionary<BaseGate, int> IDReference = new();
         int maxID = 0;

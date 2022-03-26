@@ -30,11 +30,11 @@ partial class Form1
     {
         this.components = new System.ComponentModel.Container();
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(800, 450);
+        this.ClientSize = new System.Drawing.Size(800, 800);
         this.Text = "ЦифТех: Взлом Сейфа";
         this.sceneManager = new();
         this.sceneManager.Width = 800;
-        this.sceneManager.Height = 450;
+        this.sceneManager.Height = 800;
         this.Controls.Add(this.sceneManager);
     }
 
