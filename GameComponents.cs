@@ -678,9 +678,3 @@ public class Scheme {
 
 
 }
-
-public class Level {
-    public Scheme scheme; 
-    public string levelName;
-
-}
