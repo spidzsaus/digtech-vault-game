@@ -82,6 +82,8 @@ public class TestScene : Scene {
         this.levelViewer.configure(10, 10, 100);
         this.levelViewer.openLevel(mainLevel);
 
+        mainLevel.fromJson(mainLevel.toJson());
+
         parent.Controls.Add(this.levelViewer);
     }
 }
