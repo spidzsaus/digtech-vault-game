@@ -32,10 +32,6 @@ partial class Form1
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(800, 800);
         this.Text = "ЦифТех: Взлом Сейфа";
-        this.sceneManager = new();
-        this.sceneManager.Width = 800;
-        this.sceneManager.Height = 800;
-        this.Controls.Add(this.sceneManager);
     }
 
     #endregion

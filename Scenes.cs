@@ -23,66 +23,72 @@ abstract public class Scene {
     }
 }
 
+public class GameScene : Scene {
+    public GameScene(Levels.Level level) {
+        this.level = level;
+    }
+    Levels.Level level;
+    LevelViewer levelViewer;
+    public override void init(SceneManager parent)
+    {
+        base.init(parent);
+
+        this.levelViewer = new();
+        this.levelViewer.configure(10, 10, 100);
+        this.levelViewer.openLevel(this.level);
+
+        parent.Controls.Add(this.levelViewer);
+
+
+    }
+}
+
+public class LevelSelectScene : Scene {
+    Levels.Level[] levels;
+    Button[] levelButtons;
+    public override void init(SceneManager parent)
+    {
+        base.init(parent);
+        string[] levelPaths = System.IO.Directory.GetFiles(@"gamedata/levels/", "*.json",
+                                            System.IO.SearchOption.TopDirectoryOnly);
+        this.levels = new Levels.Level[levelPaths.Length];
+        this.levelButtons = new Button[levelPaths.Length];
+        for (int i = 0; i < levelPaths.Length; i++)
+        {
+            this.levels[i] = new();
+            this.levels[i].fromJson(System.IO.File.ReadAllText(levelPaths[i]), true);
+            Levels.Level curlevel = this.levels[i];
+            string curpath = levelPaths[i];
+            void openThisLevel(object sender, EventArgs e){
+                curlevel.fromJson(System.IO.File.ReadAllText(curpath), false);
+                this.parent.openScene(new GameScene(curlevel));
+            }
+            this.levelButtons[i] = new();
+            this.levelButtons[i].Width = 100;
+            this.levelButtons[i].Height = 50;
+            this.levelButtons[i].Location = new(10, 50 * i);
+            this.levelButtons[i].Click += openThisLevel;
+            this.levelButtons[i].Text = curlevel.levelName;
+            parent.Controls.Add(this.levelButtons[i]);
+        }
+
+
+    }
+
+}
 public class TestScene : Scene {
     LevelViewer levelViewer;
     public override void init(SceneManager parent)
     {
         base.init(parent);
-        GameComponents.Scheme mainScheme = new();
-        GameComponents.ButtonInputGate i1 = new();
-        GameComponents.ButtonInputGate i2 = new();
-        GameComponents.ButtonInputGate i3 = new();
-        GameComponents.ButtonInputGate i4 = new();
-        GameComponents.LampOutputGate o1 = new();
-        GameComponents.XorGate xor = new();
-        GameComponents.AndGate and = new();
-        GameComponents.NotGate not = new();
-        GameComponents.OrGate xnor = new();
         
-        i1.connect(xor, 0, 0);
-        i2.connect(xor, 0, 1);
-        i3.connect(not, 0, 0);
-        xor.connect(and, 0, 0);
-        i4.connect(and, 0, 1);  
-        not.connect(xnor, 0, 1);
-        and.connect(xnor, 0, 0);     
-        xnor.connect(o1, 0, 0); 
-
-        i1.setPosition(0, 0);
-        i2.setPosition(0, 2);
-        i3.setPosition(0, 3);
-        i4.setPosition(0, 1);
-        xor.setPosition(1, 0);
-        and.setPosition(2, 1);
-        not.setPosition(2, 3);
-        xnor.setPosition(3, 2);
-        o1.setPosition(4, 1);
-
-        mainScheme.addGate(i1);
-        mainScheme.addGate(i2);
-        mainScheme.addGate(i3);
-        mainScheme.addGate(i4);
-        mainScheme.addGate(not);
-        mainScheme.addGate(xnor);
-        mainScheme.addGate(xor);
-        mainScheme.addGate(o1);
-        mainScheme.addGate(and);
-
-        mainScheme.compile();
-
-        foreach (var pair in mainScheme.truthTable!) {
-            Console.WriteLine($"{pair.Key[0]} : {pair.Value[0]}");
-        }
-
         Levels.Level mainLevel = new();
-        mainLevel.levelName = "Test";
-        mainLevel.scheme = mainScheme;
+        mainLevel.fromJson(System.IO.File.ReadAllText(@"gamedata/levels/test.json"),
+                           false);
 
         this.levelViewer = new();
         this.levelViewer.configure(10, 10, 100);
         this.levelViewer.openLevel(mainLevel);
-
-        mainLevel.fromJson(mainLevel.toJson());
 
         parent.Controls.Add(this.levelViewer);
     }
@@ -110,7 +116,7 @@ public class MenuScene : Scene {
     }
 
     public void openTestScene(object sender, EventArgs e) {
-        this.parent.openScene(new TestScene());
+        this.parent.openScene(new LevelSelectScene());
     }    
 
     public void exitAction(object sender, EventArgs e) {
