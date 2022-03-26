@@ -675,6 +675,42 @@ public class Scheme {
         }
         return output;
     }
+}
 
 
+public class Alliases {
+    static public Dictionary<Type, string> componentNames = new() 
+    {
+        {typeof(AndGate), "and"},
+        {typeof(NotGate), "not"},
+        {typeof(BaseGate), "empty"},
+        {typeof(BufGate), "buf"},
+        {typeof(NandGate), "nand"},
+        {typeof(OrGate), "or"},
+        {typeof(NorGate), "nor"},
+        {typeof(XorGate), "xor"},
+        {typeof(XnorGate), "xnor"},
+        {typeof(DummyInputGate), "dumin"},
+        {typeof(DummyOutputGate), "dumout"},
+        {typeof(LogOutputGate), "logout"},
+        {typeof(LampOutputGate), "lamp"},
+        {typeof(ButtonInputGate), "inp"}
+    };
+    static public Dictionary<string, Type> nameMeanings = new() 
+    {
+        {"and", typeof(AndGate)},
+        {"not", typeof(NotGate)},
+        {"empty", typeof(BaseGate)},
+        {"buf", typeof(BufGate)},
+        {"nand", typeof(NandGate)},
+        {"or", typeof(OrGate)},
+        {"nor", typeof(NorGate)},
+        {"xor", typeof(XorGate)},
+        {"xnor", typeof(XnorGate)},
+        {"dumin", typeof(DummyInputGate)},
+        {"dumout", typeof(DummyOutputGate)},
+        {"logout", typeof(LogOutputGate)},
+        {"lamp", typeof(LampOutputGate)},
+        {"inp", typeof(ButtonInputGate)}
+    };
 }

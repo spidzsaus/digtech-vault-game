@@ -9,9 +9,8 @@ static class Program
     [STAThread]
     static void Main()
     {   
-        /*GameComponents.Scheme mainScheme = new();
-        ApplicationConfiguration.Initialize();
 
+        GameComponents.Scheme mainScheme = new();
         GameComponents.ButtonInputGate i1 = new();
         GameComponents.ButtonInputGate i2 = new();
         GameComponents.ButtonInputGate i3 = new();
@@ -57,14 +56,11 @@ static class Program
             Console.WriteLine($"{pair.Key[0]} : {pair.Value[0]}");
         }
 
-        Form1 mainForm = new Form1();
-
         Level mainLevel = new Level();
+        mainLevel.levelName = "Test";
         mainLevel.scheme = mainScheme;
 
-        mainForm.openLevel(mainLevel);
-
-        Application.Run(mainForm);*/
+        File.WriteAllText("test.json", mainLevel.toJson());
 
         ApplicationConfiguration.Initialize();
         Form1 mainForm = new Form1();
