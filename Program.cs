@@ -13,6 +13,7 @@ static class Program
         Form1 mainForm = new Form1();
         MenuScene mainMenu = new();
         mainForm.sceneManager.openScene(mainMenu);
+        
         Application.Run(mainForm);
     }    
 }

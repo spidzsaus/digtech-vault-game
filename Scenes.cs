@@ -127,6 +127,7 @@ public class GameScene : Scene {
         this.levelViewer.Location = new(0, 100);
         this.levelViewer.configure(10, 10, 100);
         this.levelViewer.openLevel(this.level);
+        this.levelViewer.Anchor = (AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom);
 
         this.commitButton = new();
         this.commitButton.Width = 200;
@@ -135,6 +136,7 @@ public class GameScene : Scene {
         this.commitButton.Click += this.commit;
         this.commitButton.Enabled = false;
         this.commitButton.BackgroundImage = Textures.button_green;
+        this.commitButton.Anchor = (AnchorStyles.Left | AnchorStyles.Top);
         parent.Controls.Add(this.commitButton);
 
 

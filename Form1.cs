@@ -14,6 +14,7 @@ public partial class Form1 : Form
         this.sceneManager = new();
         this.sceneManager.Width = 800;
         this.sceneManager.Height = 800;
+        this.sceneManager.Anchor = (AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom);
         this.Controls.Add(this.sceneManager);
     }
 
