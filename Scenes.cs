@@ -32,7 +32,7 @@ public class GameScene : Scene {
     Button commitButton;
     
     Button backToTheMenuButton;
-    Button retryButton;
+    Button firstButton;
     bool Active = true;
     int turnsLeft;
     LevelViewer levelViewer;
@@ -46,7 +46,31 @@ public class GameScene : Scene {
     }
 
     public void retry(object sender, EventArgs e) {
+        this.level.fromJson(System.IO.File.ReadAllText(this.level.levelPath!), false);
         this.parent.openScene(new GameScene(this.level));
+    }
+
+    public void win() {
+        System.Media.SoundPlayer temp = new System.Media.SoundPlayer(@"resources/win.wav");
+        temp.Play();
+        this.Active = false;
+        this.levelViewer.Enabled = false;
+
+        this.backToTheMenuButton = new();
+        this.backToTheMenuButton.Location = new(410, 0);
+        this.backToTheMenuButton.Width = 200;
+        this.backToTheMenuButton.Height = 100;
+        this.backToTheMenuButton.Text = "Back to the menu";
+        this.backToTheMenuButton.Click += this.backToTheMenu;
+        parent.Controls.Add(this.backToTheMenuButton);
+
+        this.firstButton = new();
+        this.firstButton.Location = new(210, 0);
+        this.firstButton.Width = 200;
+        this.firstButton.Height = 100;
+        this.firstButton.Text = "View certificate";
+        this.firstButton.Click += this.retry;
+        parent.Controls.Add(this.firstButton);
     }
     public void fail() {
         System.Media.SoundPlayer temp = new System.Media.SoundPlayer(@"resources/fail.wav");
@@ -62,23 +86,27 @@ public class GameScene : Scene {
         this.backToTheMenuButton.Click += this.backToTheMenu;
         parent.Controls.Add(this.backToTheMenuButton);
 
-        this.retryButton = new();
-        this.retryButton.Location = new(210, 0);
-        this.retryButton.Width = 200;
-        this.retryButton.Height = 100;
-        this.retryButton.Text = "Try again";
-        this.retryButton.Click += this.retry;
-        parent.Controls.Add(this.retryButton);
+        this.firstButton = new();
+        this.firstButton.Location = new(210, 0);
+        this.firstButton.Width = 200;
+        this.firstButton.Height = 100;
+        this.firstButton.Text = "Try again";
+        this.firstButton.Click += this.retry;
+        parent.Controls.Add(this.firstButton);
     }
     public void commit(object sender, EventArgs e) {
-        this.level.scheme.run();
+        bool[] result = this.level.scheme.run();
         this.levelViewer.Refresh();
         this.commitButton.Enabled  = false;
         this.turnsLeft -= 1;
-        if (this.turnsLeft >= 0) {
-            this.commitButton.Text = "Commit (" + this.turnsLeft.ToString() + ")";
+        if (!result.Contains(false)) {
+            this.win();
         } else {
-            this.fail();
+            if (this.turnsLeft >= 0) {
+                this.commitButton.Text = "Commit (" + this.turnsLeft.ToString() + ")";
+            } else {
+                this.fail();
+            }
         }
 
     }
@@ -129,7 +157,8 @@ public class LevelSelectScene : Scene {
             string curpath = levelPaths[i];
             void openThisLevel(object sender, EventArgs e){
                 curlevel.fromJson(System.IO.File.ReadAllText(curpath), false);
-                this.parent.openScene(new GameScene(curlevel));
+                curlevel.levelPath = curpath;
+                this.parent.openScene(new GameScene(curlevel));  
             }
             this.levelButtons[i] = new();
             this.levelButtons[i].Width = 100;

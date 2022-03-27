@@ -33,6 +33,7 @@ public class Level {
     public Scheme scheme; 
     public string levelName;
     public int turns;
+    public string? levelPath;
 
     public void init(){
         int difficulty = 0;
