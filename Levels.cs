@@ -41,7 +41,7 @@ public class Level {
         {
             if (item.is_hidden) difficulty = difficulty + 1;
         }
-        this.turns = difficulty * 2 + 3;
+        this.turns = difficulty * 2 + 2;
     }
     public void fromJson(string json, bool metaOnly) {
         PlainLevel pl = JsonSerializer.Deserialize<PlainLevel>(json);

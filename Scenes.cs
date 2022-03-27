@@ -1,8 +1,12 @@
 namespace Scenes;
 
 using LogiWidgets;
+using Textures;
 
 public class SceneManager : Panel {
+    public SceneManager() : base() {
+        this.BackgroundImage = Textures.bath_tile;
+    }
     Scene? scene;
     public System.Media.SoundPlayer player;
     public void openScene(Scene scene) {
@@ -62,6 +66,7 @@ public class GameScene : Scene {
         this.backToTheMenuButton.Height = 100;
         this.backToTheMenuButton.Text = "Back to the menu";
         this.backToTheMenuButton.Click += this.backToTheMenu;
+        this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
         parent.Controls.Add(this.backToTheMenuButton);
 
         this.firstButton = new();
@@ -70,6 +75,7 @@ public class GameScene : Scene {
         this.firstButton.Height = 100;
         this.firstButton.Text = "View certificate";
         this.firstButton.Click += this.retry;
+        this.firstButton.BackgroundImage = Textures.button_golden;
         parent.Controls.Add(this.firstButton);
     }
     public void fail() {
@@ -84,6 +90,7 @@ public class GameScene : Scene {
         this.backToTheMenuButton.Height = 100;
         this.backToTheMenuButton.Text = "Back to the menu";
         this.backToTheMenuButton.Click += this.backToTheMenu;
+        this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
         parent.Controls.Add(this.backToTheMenuButton);
 
         this.firstButton = new();
@@ -92,6 +99,7 @@ public class GameScene : Scene {
         this.firstButton.Height = 100;
         this.firstButton.Text = "Try again";
         this.firstButton.Click += this.retry;
+        this.firstButton.BackgroundImage = Textures.button_golden;
         parent.Controls.Add(this.firstButton);
     }
     public void commit(object sender, EventArgs e) {
@@ -126,6 +134,7 @@ public class GameScene : Scene {
         this.commitButton.Text = "Commit (" + this.turnsLeft.ToString() + ")";
         this.commitButton.Click += this.commit;
         this.commitButton.Enabled = false;
+        this.commitButton.BackgroundImage = Textures.button_green;
         parent.Controls.Add(this.commitButton);
 
 
@@ -166,6 +175,7 @@ public class LevelSelectScene : Scene {
             this.levelButtons[i].Location = new(10, 50 * i);
             this.levelButtons[i].Click += openThisLevel;
             this.levelButtons[i].Text = curlevel.levelName;
+            this.levelButtons[i].BackgroundImage = Textures.button_gray;
             parent.Controls.Add(this.levelButtons[i]);
         }
 
@@ -184,11 +194,13 @@ public class MenuScene : Scene {
         this.gameStart.Width = 300;
         this.gameStart.Height = 100;
         this.gameStart.Click += this.openTestScene;
+        this.gameStart.BackgroundImage = Textures.button_gray;
         this.exit = new();
         this.exit.Location = new(100, 200);
         this.exit.Width = 300;
         this.exit.Height = 100;
         this.exit.Click += this.exitAction;
+        this.exit.BackgroundImage = Textures.button_reddish;
         
         if (parent.player != null) parent.player.Stop();
         parent.player = new System.Media.SoundPlayer(@"resources/menu.wav");
