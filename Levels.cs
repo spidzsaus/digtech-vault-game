@@ -34,6 +34,14 @@ public class Level {
     public string levelName;
     public int turns;
 
+    public void init(){
+        int difficulty = 0;
+        foreach (BaseGate item in this.scheme.getGates())
+        {
+            if (item.is_hidden) difficulty = difficulty + 1;
+        }
+        this.turns = difficulty * 2 + 3;
+    }
     public void fromJson(string json, bool metaOnly) {
         PlainLevel pl = JsonSerializer.Deserialize<PlainLevel>(json);
         this.levelName = pl.name;

@@ -4,32 +4,41 @@ using Levels;
 namespace LogiWidgets;
 
 public class LevelViewer : Panel {
+    Scenes.GameScene scene;
     Level level;
     int XShift;
     int YShift;
     int scale;
     int bufferSpace = 10;
+    public bool Enabled = true;
     DrawStandart standart;
-    public LevelViewer() : base() {
+    public LevelViewer(Scenes.GameScene scene) : base() {
         this.standart = DrawStandart.IEC;
         this.MouseClick += panelClick;
+        this.scene = scene;
     }
     protected void panelClick(object sender, MouseEventArgs e)
     {
-        int mouseX = e.X;
-        int mouseY = e.Y;
-        int componentX = (int)((mouseX - this.XShift) / (this.scale * 1.5f));
-        int componentY = (int)((mouseY - this.YShift) / (this.scale * 1.5f));
-        BaseGate? component = this.level.scheme.getComponent(componentX, componentY);
-        if (component != null) { 
-            bool result = component.onClick();
-            if (result) this.Refresh();
+        if (this.Enabled) {
+            int mouseX = e.X;
+            int mouseY = e.Y;
+            int componentX = (int)System.Math.Floor((mouseX - this.XShift) / (this.scale * 1.5f));
+            int componentY = (int)System.Math.Floor((mouseY - this.YShift) / (this.scale * 1.5f));
+            BaseGate? component = this.level.scheme.getComponent(componentX, componentY);
+            if (component != null) { 
+                bool result = component.onClick();
+                if (result) { 
+                    this.Refresh();
+                    this.scene.unlockCommitButton();
+                }
+            }
         }
     }
     public void openLevel(Level level) {
         this.level = level;
         this.Width = this.XShift + this.scale + (int)(this.scale * 1.5f * level.scheme.getRangeX()) + bufferSpace;
         this.Height = this.YShift + this.scale + (int)(this.scale * 1.5f * level.scheme.getRangeY()) + bufferSpace;
+        this.level.init();
     }
     public void setStandart(DrawStandart standart) {
         this.standart = standart;

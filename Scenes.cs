@@ -29,14 +29,77 @@ public class GameScene : Scene {
         this.level = level;
     }
     Levels.Level level;
+    Button commitButton;
+    
+    Button backToTheMenuButton;
+    Button retryButton;
+    bool Active = true;
+    int turnsLeft;
     LevelViewer levelViewer;
+    public void unlockCommitButton() {
+        this.commitButton.Enabled = true;
+    }
+    public void backToTheMenu(object sender, EventArgs e) {
+        this.parent.openScene(new LevelSelectScene());
+        parent.player = new System.Media.SoundPlayer(@"resources/menu.wav");
+        parent.player.PlayLooping();
+    }
+
+    public void retry(object sender, EventArgs e) {
+        this.parent.openScene(new GameScene(this.level));
+    }
+    public void fail() {
+        System.Media.SoundPlayer temp = new System.Media.SoundPlayer(@"resources/fail.wav");
+        temp.Play();
+        this.Active = false;
+        this.levelViewer.Enabled = false;
+
+        this.backToTheMenuButton = new();
+        this.backToTheMenuButton.Location = new(410, 0);
+        this.backToTheMenuButton.Width = 200;
+        this.backToTheMenuButton.Height = 100;
+        this.backToTheMenuButton.Text = "Back to the menu";
+        this.backToTheMenuButton.Click += this.backToTheMenu;
+        parent.Controls.Add(this.backToTheMenuButton);
+
+        this.retryButton = new();
+        this.retryButton.Location = new(210, 0);
+        this.retryButton.Width = 200;
+        this.retryButton.Height = 100;
+        this.retryButton.Text = "Try again";
+        this.retryButton.Click += this.retry;
+        parent.Controls.Add(this.retryButton);
+    }
+    public void commit(object sender, EventArgs e) {
+        this.level.scheme.run();
+        this.levelViewer.Refresh();
+        this.commitButton.Enabled  = false;
+        this.turnsLeft -= 1;
+        if (this.turnsLeft >= 0) {
+            this.commitButton.Text = "Commit (" + this.turnsLeft.ToString() + ")";
+        } else {
+            this.fail();
+        }
+
+    }
     public override void init(SceneManager parent)
     {
         base.init(parent);
-
-        this.levelViewer = new();
+        this.level.init();
+        this.turnsLeft = this.level.turns;
+        this.levelViewer = new(this);
+        this.levelViewer.Location = new(0, 100);
         this.levelViewer.configure(10, 10, 100);
         this.levelViewer.openLevel(this.level);
+
+        this.commitButton = new();
+        this.commitButton.Width = 200;
+        this.commitButton.Height = 100;
+        this.commitButton.Text = "Commit (" + this.turnsLeft.ToString() + ")";
+        this.commitButton.Click += this.commit;
+        this.commitButton.Enabled = false;
+        parent.Controls.Add(this.commitButton);
+
 
         parent.Controls.Add(this.levelViewer);
 

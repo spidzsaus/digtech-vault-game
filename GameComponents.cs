@@ -464,7 +464,7 @@ public class ButtonInputGate: BaseGate
 { 
     override public bool onClick() {
         this.suggestion = !this.suggestion;
-        this.Parent.run();
+        //this.Parent.run();
         return true;
     }
     override public int input_slots {get => 0;}
