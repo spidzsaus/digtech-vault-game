@@ -43,6 +43,7 @@ public class LevelViewer : Panel {
         this.Width = this.XShift + this.scale + (int)(this.scale * 1.5f * level.scheme.getRangeX()) + bufferSpace;
         this.Height = this.YShift + this.scale + (int)(this.scale * 1.5f * level.scheme.getRangeY()) + bufferSpace;
         this.level.init();
+        Console.WriteLine(level.generateCertificate());
     }
     public void setStandart(DrawStandart standart) {
         this.standart = standart;

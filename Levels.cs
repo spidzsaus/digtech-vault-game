@@ -29,11 +29,50 @@ class ConnectionQueueSlot {
     public PlainPipe connection { get; set; }
 }
 
+public enum ValidationMode {UltraMegaHard, SoftCard};
 public class Level {
     public Scheme scheme; 
     public string levelName;
     public int turns;
     public string? levelPath;
+    byte[]? levelCode = null;
+
+    public byte[] generateCertificate(ValidationMode mode) {
+        string id = "";
+        if (mode == ValidationMode.UltraMegaHard) {
+            /*var mbs = new System.Management.ManagementObjectSearcher("Select ProcessorId From Win32_processor");
+            System.Management.ManagementObjectCollection mbsList = mbs.Get();
+            foreach (System.Management.ManagementObject mo in mbsList)
+            {
+                id = mo["ProcessorId"].ToString();
+                break;
+            }*/
+            
+        } else {
+            string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+            id = System.IO.File.ReadAllText(@"gamedata/profile/" + userName + "_card");
+        }
+        if (levelCode == null) {
+            System.Security.Cryptography.HashAlgorithm algo = new System.Security.Cryptography.SHA256Managed();
+            string body = this.toJson();
+            byte[] bytes = new byte[body.Length];
+
+            for (int i = 0; i < body.Length; i++)
+            {
+                bytes[i] = ((byte)body[i]);
+            }
+            this.levelCode = algo.ComputeHash(bytes); 
+        }
+        string code = id + levelCode;
+        System.Security.Cryptography.HashAlgorithm algorithm = new System.Security.Cryptography.SHA256Managed();
+        byte[] bytes1 = new byte[code.Length];
+
+        for (int i = 0; i < code.Length; i++)
+        {
+            bytes1[i] = ((byte)code[i]);
+        }
+        return algorithm.ComputeHash(bytes1); 
+    }
 
     public void init(){
         int difficulty = 0;
@@ -77,6 +116,15 @@ public class Level {
             }
 
             this.scheme.compile();
+        	System.Security.Cryptography.HashAlgorithm algo = new System.Security.Cryptography.SHA256Managed();
+            string body = json;
+            byte[] bytes = new byte[body.Length];
+
+            for (int i = 0; i < body.Length; i++)
+            {
+                bytes[i] = ((byte)body[i]);
+            }
+            this.levelCode = algo.ComputeHash(bytes); 
         }
     }
 
