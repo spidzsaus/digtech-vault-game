@@ -163,36 +163,111 @@ public class GameScene : Scene {
 public class LevelSelectScene : Scene {
     Levels.Level[] levels;
     Button[] levelButtons;
+    Button nextPageButton;
+    Button prevPageButton;
+    Button backToTheMenuButton;
+    int maxPage;
+    int currentPage;
+    static int maxLevelsPerPage = 4;
+    public void backToTheMenu(object sender, EventArgs e) {
+        this.parent.openScene(new MenuScene());
+    }
+    public void openPage(int page) {
+        int start = maxLevelsPerPage * page;
+        int finish = (int)(start + maxLevelsPerPage);
+        if (finish > levels.Length) finish = levels.Length;
+
+        if (this.levelButtons != null) {
+            foreach (Button item in levelButtons)
+            {
+                this.parent.Controls.Remove(item);
+                item.Dispose();
+            }
+        }
+        levelButtons = new Button[finish - start];
+
+        for (int i = start; i < finish; i++)
+        {
+            Levels.Level curlevel = this.levels[i];
+            void openThisLevel(object sender, EventArgs e){
+                curlevel.fromJson(System.IO.File.ReadAllText(curlevel.levelPath), false);
+                this.parent.openScene(new GameScene(curlevel));  
+            }
+            int j = i - start;
+            this.levelButtons[j] = new();
+            this.levelButtons[j].Width = 100;
+            this.levelButtons[j].Height = 50;
+            this.levelButtons[j].Location = new(10, 50 * j);
+            this.levelButtons[j].Click += openThisLevel;
+            this.levelButtons[j].Text = curlevel.levelName;
+            this.levelButtons[j].BackgroundImage = Textures.button_gray;
+            this.levelButtons[j].Dock = DockStyle.Top;
+            parent.Controls.Add(this.levelButtons[j]);
+        }
+    }
+
+    public void nextPage(object sender, EventArgs e) {
+        this.currentPage += 1;
+        openPage(this.currentPage);
+        this.nextPageButton.Enabled = (currentPage < this.maxPage);
+        this.prevPageButton.Enabled = (currentPage > 0);
+    }
+    public void prevPage(object sender, EventArgs e) {
+        this.currentPage -= 1;
+        openPage(this.currentPage);
+        this.nextPageButton.Enabled = (currentPage < this.maxPage);
+        this.prevPageButton.Enabled = (currentPage > 0);
+    }
+    
     public override void init(SceneManager parent)
     {
         base.init(parent);
         string[] levelPaths = System.IO.Directory.GetFiles(@"gamedata/levels/", "*.json",
                                             System.IO.SearchOption.TopDirectoryOnly);
+        System.Array.Sort(levelPaths);
         this.levels = new Levels.Level[levelPaths.Length];
-        this.levelButtons = new Button[levelPaths.Length];
         for (int i = 0; i < levelPaths.Length; i++)
         {
             this.levels[i] = new();
             this.levels[i].fromJson(System.IO.File.ReadAllText(levelPaths[i]), true);
             Levels.Level curlevel = this.levels[i];
             string curpath = levelPaths[i];
-            void openThisLevel(object sender, EventArgs e){
-                curlevel.fromJson(System.IO.File.ReadAllText(curpath), false);
-                curlevel.levelPath = curpath;
-                this.parent.openScene(new GameScene(curlevel));  
-            }
-            this.levelButtons[i] = new();
-            this.levelButtons[i].Width = 100;
-            this.levelButtons[i].Height = 50;
-            this.levelButtons[i].Location = new(10, 50 * i);
-            this.levelButtons[i].Click += openThisLevel;
-            this.levelButtons[i].Text = curlevel.levelName;
-            this.levelButtons[i].BackgroundImage = Textures.button_gray;
-            this.levelButtons[i].Dock = DockStyle.Top;
-            parent.Controls.Add(this.levelButtons[i]);
+            curlevel.levelPath = curpath;
         }
+        this.maxPage = (int)System.Math.Ceiling((double)(this.levels.Length / maxLevelsPerPage));
 
+        this.nextPageButton = new();
+        this.nextPageButton.Click += this.nextPage;
+        this.nextPageButton.Text = ">";
+        this.nextPageButton.BackgroundImage = Textures.button_green;
+        this.nextPageButton.Width = 200;
+        this.nextPageButton.Height = 180;
+        this.nextPageButton.Anchor = (AnchorStyles.Bottom | AnchorStyles.Right);
+        this.nextPageButton.Location = new(parent.Width - 200, parent.Height - 180);
+        parent.Controls.Add(this.nextPageButton);
 
+        this.prevPageButton = new();
+        this.prevPageButton.Click += this.prevPage;
+        this.prevPageButton.Text = "<";
+        this.prevPageButton.BackgroundImage = Textures.button_green;
+        this.prevPageButton.Width = 200;
+        this.prevPageButton.Height = 180;
+        this.prevPageButton.Anchor = (AnchorStyles.Bottom | AnchorStyles.Left);
+        this.prevPageButton.Location = new(0, parent.Height - 180);
+        this.prevPageButton.Enabled = false;
+        parent.Controls.Add(this.prevPageButton);
+
+        this.backToTheMenuButton = new();
+        this.backToTheMenuButton.Anchor = AnchorStyles.Bottom;
+        this.backToTheMenuButton.Location = new(parent.Width / 2 - 200, parent.Height - 180);
+        this.backToTheMenuButton.Width = 400;
+        this.backToTheMenuButton.Height = 180;
+        this.backToTheMenuButton.Text = "Back to the menu";
+        this.backToTheMenuButton.Click += this.backToTheMenu;
+        this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
+        parent.Controls.Add(this.backToTheMenuButton);
+
+        openPage(0);
     }
 
 }
@@ -203,16 +278,18 @@ public class MenuScene : Scene {
     override public void init(SceneManager parent) {
         base.init(parent);
         this.gameStart = new();
-        this.gameStart.Anchor = (AnchorStyles.Bottom);
-        this.gameStart.Location = new(100, 100);
+        this.gameStart.Anchor = (AnchorStyles.Top);
+        //this.gameStart.Location = new(parent.Width / 2 - 300, parent.Height / 2 - 200);
+        this.gameStart.Location = new(parent.Width / 2 - 300, 100);
         this.gameStart.Width = 600;
         this.gameStart.Height = 100;
         this.gameStart.Click += this.openTestScene;
         this.gameStart.BackgroundImage = Textures.button_gray;
 
         this.exit = new();
-        this.exit.Anchor = (AnchorStyles.Bottom);
-        this.exit.Location = new(100, 200);
+        this.exit.Anchor = (AnchorStyles.Top);
+        //this.exit.Location = new(parent.Width / 2 - 300, parent.Height / 2 - 100);
+        this.exit.Location = new(parent.Width / 2 - 300, 200);
         this.exit.Width = 600;
         this.exit.Height = 100;
         this.exit.Click += this.exitAction;
