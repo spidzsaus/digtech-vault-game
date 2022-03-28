@@ -5,4 +5,6 @@ class Textures {
     public static Image button_golden = Image.FromFile(@"resources/button_golden.png");
     public static Image button_reddish = Image.FromFile(@"resources/button_reddish.png");
     public static Image button_green = Image.FromFile(@"resources/button_green.png");
+
+    public static Font big_font = new Font("Arial", 18);
 }

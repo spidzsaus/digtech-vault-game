@@ -72,6 +72,7 @@ public class GameScene : Scene {
         this.backToTheMenuButton.Text = "Back to the menu";
         this.backToTheMenuButton.Click += this.backToTheMenu;
         this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
+        this.backToTheMenuButton.Font = Textures.big_font;
         parent.Controls.Add(this.backToTheMenuButton);
 
         this.firstButton = new();
@@ -81,6 +82,7 @@ public class GameScene : Scene {
         this.firstButton.Text = "View certificate";
         this.firstButton.Click += this.retry;
         this.firstButton.BackgroundImage = Textures.button_golden;
+        this.firstButton.Font = Textures.big_font;
         parent.Controls.Add(this.firstButton);
     }
     public void fail() {
@@ -96,6 +98,7 @@ public class GameScene : Scene {
         this.backToTheMenuButton.Text = "Back to the menu";
         this.backToTheMenuButton.Click += this.backToTheMenu;
         this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
+        this.backToTheMenuButton.Font = Textures.big_font;
         parent.Controls.Add(this.backToTheMenuButton);
 
         this.firstButton = new();
@@ -105,6 +108,7 @@ public class GameScene : Scene {
         this.firstButton.Text = "Try again";
         this.firstButton.Click += this.retry;
         this.firstButton.BackgroundImage = Textures.button_golden;
+        this.firstButton.Font = Textures.big_font;
         parent.Controls.Add(this.firstButton);
     }
     public void commit(object sender, EventArgs e) {
@@ -146,6 +150,7 @@ public class GameScene : Scene {
         this.commitButton.Click += this.commit;
         this.commitButton.Enabled = false;
         this.commitButton.BackgroundImage = Textures.button_green;
+        this.commitButton.Font = Textures.big_font;
         //this.commitButton.Anchor = (AnchorStyles.Left | AnchorStyles.Top);
         parent.Controls.Add(this.commitButton);
 
@@ -202,6 +207,7 @@ public class LevelSelectScene : Scene {
             this.levelButtons[j].Text = curlevel.levelName;
             this.levelButtons[j].BackgroundImage = Textures.button_gray;
             this.levelButtons[j].Dock = DockStyle.Top;
+            this.levelButtons[j].Font = Textures.big_font;
             parent.Controls.Add(this.levelButtons[j]);
         }
     }
@@ -244,6 +250,7 @@ public class LevelSelectScene : Scene {
         this.nextPageButton.Height = 180;
         this.nextPageButton.Anchor = (AnchorStyles.Bottom | AnchorStyles.Right);
         this.nextPageButton.Location = new(parent.Width - 200, parent.Height - 180);
+        this.nextPageButton.Font = Textures.big_font;
         parent.Controls.Add(this.nextPageButton);
 
         this.prevPageButton = new();
@@ -255,6 +262,7 @@ public class LevelSelectScene : Scene {
         this.prevPageButton.Anchor = (AnchorStyles.Bottom | AnchorStyles.Left);
         this.prevPageButton.Location = new(0, parent.Height - 180);
         this.prevPageButton.Enabled = false;
+        this.prevPageButton.Font = Textures.big_font;
         parent.Controls.Add(this.prevPageButton);
 
         this.backToTheMenuButton = new();
@@ -265,6 +273,7 @@ public class LevelSelectScene : Scene {
         this.backToTheMenuButton.Text = "Back to the menu";
         this.backToTheMenuButton.Click += this.backToTheMenu;
         this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
+        this.backToTheMenuButton.Font = Textures.big_font;
         parent.Controls.Add(this.backToTheMenuButton);
 
         openPage(0);
@@ -293,6 +302,8 @@ public class MenuScene : Scene {
         this.gameStart.Height = 100;
         this.gameStart.Click += this.openTestScene;
         this.gameStart.BackgroundImage = Textures.button_gray;
+        this.gameStart.Text = "Play";
+        this.gameStart.Font = Textures.big_font;
 
         this.exit = new();
         this.exit.Anchor = (AnchorStyles.Top);
@@ -301,6 +312,8 @@ public class MenuScene : Scene {
         this.exit.Height = 100;
         this.exit.Click += this.exitAction;
         this.exit.BackgroundImage = Textures.button_reddish;
+        this.exit.Text = "Exit";
+        this.exit.Font = Textures.big_font;
         
         if (parent.player != null) parent.player.Stop();
         parent.player = new System.Media.SoundPlayer(@"resources/menu.wav");
