@@ -275,12 +275,20 @@ public class LevelSelectScene : Scene {
 public class MenuScene : Scene {
     Button gameStart;
     Button exit;
+    PictureBox logo;
     override public void init(SceneManager parent) {
         base.init(parent);
+        this.logo = new PictureBox();            
+        this.logo.ImageLocation = @"resources/logo.png";
+        this.logo.SizeMode = PictureBoxSizeMode.AutoSize;
+        this.logo.BackgroundImage = Textures.bath_tile;
+        this.logo.Anchor = AnchorStyles.Top;
+        this.logo.Location = new(parent.Width / 2 - 350, 0);
+        parent.Controls.Add(this.logo);
+
         this.gameStart = new();
         this.gameStart.Anchor = (AnchorStyles.Top);
-        //this.gameStart.Location = new(parent.Width / 2 - 300, parent.Height / 2 - 200);
-        this.gameStart.Location = new(parent.Width / 2 - 300, 100);
+        this.gameStart.Location = new(parent.Width / 2 - 300, 300);
         this.gameStart.Width = 600;
         this.gameStart.Height = 100;
         this.gameStart.Click += this.openTestScene;
@@ -288,8 +296,7 @@ public class MenuScene : Scene {
 
         this.exit = new();
         this.exit.Anchor = (AnchorStyles.Top);
-        //this.exit.Location = new(parent.Width / 2 - 300, parent.Height / 2 - 100);
-        this.exit.Location = new(parent.Width / 2 - 300, 200);
+        this.exit.Location = new(parent.Width / 2 - 300, 400);
         this.exit.Width = 600;
         this.exit.Height = 100;
         this.exit.Click += this.exitAction;
