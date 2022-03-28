@@ -17,6 +17,10 @@ public class LevelViewer : Panel {
         this.MouseClick += panelClick;
         this.scene = scene;
     }
+    protected override void OnResize(EventArgs e) {
+        base.OnResize(e);
+        this.Refresh();
+    }
     protected void panelClick(object sender, MouseEventArgs e)
     {
         if (this.Enabled) {
@@ -48,6 +52,10 @@ public class LevelViewer : Panel {
         this.XShift = XShift;
         this.YShift = YShift;
         this.scale = scale;
+        if (level != null) {
+        this.Width = this.XShift + this.scale + (int)(this.scale * 1.5f * level.scheme.getRangeX()) + bufferSpace;
+        this.Height = this.YShift + this.scale + (int)(this.scale * 1.5f * level.scheme.getRangeY()) + bufferSpace;
+        }
     }
 
     protected override void OnPaint(PaintEventArgs e) {

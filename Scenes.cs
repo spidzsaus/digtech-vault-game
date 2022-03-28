@@ -16,6 +16,10 @@ public class SceneManager : Panel {
         this.scene = scene;
         this.scene.init(this);
     }
+    override protected void OnResize(EventArgs e) {
+        base.OnResize(e);
+        if (this.scene != null) this.scene.resize();
+    }
 }
 
 abstract public class Scene {
@@ -26,6 +30,7 @@ abstract public class Scene {
     public virtual void close() {
         this.parent.Controls.Clear();
     }
+    public virtual void resize() {}
 }
 
 public class GameScene : Scene {
@@ -118,6 +123,11 @@ public class GameScene : Scene {
         }
 
     }
+    public override void resize()
+    {
+        this.levelViewer.configure(10, 10, (parent.Width < parent.Height ? parent.Width : parent.Height) / 8);
+
+    }
     public override void init(SceneManager parent)
     {
         base.init(parent);
@@ -125,9 +135,9 @@ public class GameScene : Scene {
         this.turnsLeft = this.level.turns;
         this.levelViewer = new(this);
         this.levelViewer.Location = new(0, 100);
-        this.levelViewer.configure(10, 10, 100);
+        this.levelViewer.configure(10, 10, (parent.Width < parent.Height ? parent.Width : parent.Height) / 8);
         this.levelViewer.openLevel(this.level);
-        this.levelViewer.Anchor = (AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom);
+        //this.levelViewer.Anchor = (AnchorStyles.Bottom);
 
         this.commitButton = new();
         this.commitButton.Width = 200;
@@ -136,7 +146,7 @@ public class GameScene : Scene {
         this.commitButton.Click += this.commit;
         this.commitButton.Enabled = false;
         this.commitButton.BackgroundImage = Textures.button_green;
-        this.commitButton.Anchor = (AnchorStyles.Left | AnchorStyles.Top);
+        //this.commitButton.Anchor = (AnchorStyles.Left | AnchorStyles.Top);
         parent.Controls.Add(this.commitButton);
 
 
@@ -178,6 +188,7 @@ public class LevelSelectScene : Scene {
             this.levelButtons[i].Click += openThisLevel;
             this.levelButtons[i].Text = curlevel.levelName;
             this.levelButtons[i].BackgroundImage = Textures.button_gray;
+            this.levelButtons[i].Dock = DockStyle.Top;
             parent.Controls.Add(this.levelButtons[i]);
         }
 
@@ -192,14 +203,17 @@ public class MenuScene : Scene {
     override public void init(SceneManager parent) {
         base.init(parent);
         this.gameStart = new();
+        this.gameStart.Anchor = (AnchorStyles.Bottom);
         this.gameStart.Location = new(100, 100);
-        this.gameStart.Width = 300;
+        this.gameStart.Width = 600;
         this.gameStart.Height = 100;
         this.gameStart.Click += this.openTestScene;
         this.gameStart.BackgroundImage = Textures.button_gray;
+
         this.exit = new();
+        this.exit.Anchor = (AnchorStyles.Bottom);
         this.exit.Location = new(100, 200);
-        this.exit.Width = 300;
+        this.exit.Width = 600;
         this.exit.Height = 100;
         this.exit.Click += this.exitAction;
         this.exit.BackgroundImage = Textures.button_reddish;
