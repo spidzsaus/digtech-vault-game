@@ -179,13 +179,15 @@ public class Level {
             pc.X = component.gamefieldX;
             pc.Y = component.gamefieldY;
             pc.output = new();
-            foreach (Pipe con in component.recievers)
+            foreach (List<Pipe> slot in component.recievers!) {
+            foreach (Pipe con in slot)
             {
                 PlainPipe pp = new();
                 pp.from_slot = con.source_slot;
                 pp.to_slot = con.dest_slot;
                 pp.destination = IDReference[con.dest]; 
                 pc.output.Add(pp);
+            }
             }
             pl.body[IDReference[component]] = pc;
         }

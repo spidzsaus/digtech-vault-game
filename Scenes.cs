@@ -303,6 +303,7 @@ public class LevelSelectScene : Scene {
 public class CertificateValidationScene : Scene {
     Button openUserCardButton;
     Button openLevelButton;
+    Button backToTheMenuButton;
     Button openCertificateButton;
     TextBox userCardPathView;
     TextBox levelPathView;
@@ -385,6 +386,17 @@ public class CertificateValidationScene : Scene {
         this.resultMessage.Text = "Validation result";
         this.resultMessage.Font = Textures.big_font;
 
+        this.backToTheMenuButton = new();
+        this.backToTheMenuButton.Anchor = (AnchorStyles.Right | AnchorStyles.Top);
+        this.backToTheMenuButton.Location = new(parent.Width - 100, 0);
+        this.backToTheMenuButton.Width = 100;
+        this.backToTheMenuButton.Height = 100;
+        this.backToTheMenuButton.Text = "Back";
+        this.backToTheMenuButton.Click += this.backToTheMenu;
+        this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
+        this.backToTheMenuButton.Font = Textures.big_font;
+        parent.Controls.Add(this.backToTheMenuButton);
+
         parent.Controls.Add(openUserCardButton);
         parent.Controls.Add(userCardPathView);
         parent.Controls.Add(openLevelButton);
@@ -393,6 +405,9 @@ public class CertificateValidationScene : Scene {
         parent.Controls.Add(certificatePathView);
         parent.Controls.Add(compareButton);
         parent.Controls.Add(resultMessage);
+    }
+    public void backToTheMenu(object sender, EventArgs e) {
+        this.parent.openScene(new MenuScene());
     }
 
     void compare(object sender, EventArgs e) {

@@ -30,7 +30,7 @@ public enum DrawStandart {IEC, ANSI};
 abstract public class BaseGate
 {
     public Pipe[] ?delivers;
-    public Pipe[] ?recievers;
+    public List<Pipe>[] ?recievers;
     virtual public int input_slots {get;}
     virtual public int output_slots {get;}
     virtual public bool is_input {get => false;}
@@ -70,7 +70,8 @@ abstract public class BaseGate
         if (hasCircle) {
             int lineStartX = (int)(componentX + scale * 0.75f); 
             float lineStartReferenceY = componentY;
-            foreach (Pipe pipe in this.recievers!)
+            foreach (List<Pipe> slot in this.recievers!) {
+            foreach (Pipe pipe in slot)
             {
                 if (!(pipe is null)) {
                 pen.Color = pipe.state ? Color.Red : Color.Black;
@@ -101,10 +102,12 @@ abstract public class BaseGate
                                     lineEndY);
                 }
             }
+            }
         } else {
             int lineStartX = (int)(componentX + scale * 0.75f); 
             float lineStartReferenceY = componentY;
-            foreach (Pipe pipe in this.recievers!)
+            foreach (List<Pipe> slot in this.recievers!) {
+            foreach (Pipe pipe in slot)
             {
                 if (!(pipe is null)) {
                 pen.Color = pipe.state ? Color.Red : Color.Black;
@@ -129,6 +132,7 @@ abstract public class BaseGate
                                     lineEndX,
                                     lineEndY);
                 }
+            }
             }
         }
 
@@ -169,14 +173,18 @@ abstract public class BaseGate
     
     public void doChainTick() {
         this.update();
-        foreach (Pipe pipe in this.recievers!) {
+        foreach (List<Pipe> slot in this.recievers!) {
+        foreach (Pipe pipe in slot) {
             pipe.doChainTick();
+        }
         }
     }
 
     public void passForced(bool[] output) {
-        foreach (Pipe pipe in this.recievers!) {
+        foreach (List<Pipe> slot in this.recievers!) {
+        foreach (Pipe pipe in slot) {
             pipe.setState(output[pipe.source_slot]);
+        }
         }
     }
 
@@ -193,7 +201,10 @@ abstract public class BaseGate
     public Pipe connect(BaseGate other, int from_slot, int to_slot) {
         Pipe bond = new Pipe(this, from_slot,
                              other, to_slot);
-        this.recievers!.SetValue(bond, from_slot);
+        if (this.recievers![from_slot] == null) {
+            this.recievers![from_slot] = new();
+        }
+        this.recievers![from_slot].Add(bond);
         other.delivers!.SetValue(bond, to_slot);
         return bond;
     }
@@ -214,7 +225,7 @@ abstract public class BaseGate
 
     public BaseGate(){
         this.delivers = new Pipe[input_slots];
-        this.recievers = new Pipe[output_slots];
+        this.recievers = new List<Pipe>[output_slots];
     }
 }
 
@@ -504,7 +515,8 @@ public class ButtonInputGate: BaseGate
         pen.Width = 3;
         int lineStartX = (int)(componentX + scale);
             float lineStartReferenceY = componentY;
-            foreach (Pipe pipe in this.recievers!)
+            foreach (List<Pipe> slot in this.recievers!) {
+            foreach (Pipe pipe in slot)
             {
                 if (!(pipe is null)) {
                 pen.Color = pipe.state ? Color.Red : Color.Black;
@@ -529,6 +541,7 @@ public class ButtonInputGate: BaseGate
                                     lineEndX,
                                     lineEndY);
                 }
+            }
             }
 
         pen.Dispose();
