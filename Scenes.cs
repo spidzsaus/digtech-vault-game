@@ -203,7 +203,7 @@ public class LevelSelectScene : Scene {
         }
         levelButtons = new Button[finish - start];
 
-        for (int i = start; i < finish; i++)
+        for (int i = finish - 1; i >= start; i--)
         {
             Levels.Level curlevel = this.levels[i];
             void openThisLevel(object sender, EventArgs e){
@@ -214,7 +214,6 @@ public class LevelSelectScene : Scene {
             this.levelButtons[j] = new();
             this.levelButtons[j].Width = 100;
             this.levelButtons[j].Height = 50;
-            this.levelButtons[j].Location = new(10, 50 * j);
             this.levelButtons[j].Click += openThisLevel;
             this.levelButtons[j].Text = curlevel.levelName;
             this.levelButtons[j].BackgroundImage = Textures.button_gray;
@@ -240,18 +239,26 @@ public class LevelSelectScene : Scene {
     public override void init(SceneManager parent)
     {
         base.init(parent);
-        string[] levelPaths = System.IO.Directory.GetFiles(@"gamedata/levels/", "*.json",
+        string?[] levelPaths = System.IO.Directory.GetFiles(@"gamedata/levels/", "*.json",
                                             System.IO.SearchOption.TopDirectoryOnly);
         System.Array.Sort(levelPaths);
-        this.levels = new Levels.Level[levelPaths.Length];
+        Levels.Level[] prelevels = new Levels.Level[levelPaths.Length];
+        Console.WriteLine(true);
         for (int i = 0; i < levelPaths.Length; i++)
         {
-            this.levels[i] = new();
-            this.levels[i].fromJson(System.IO.File.ReadAllText(levelPaths[i]), true);
-            Levels.Level curlevel = this.levels[i];
-            string curpath = levelPaths[i];
-            curlevel.levelPath = curpath;
+            prelevels[i] = new();
+            bool result = prelevels[i].fromJson(System.IO.File.ReadAllText(levelPaths[i]), true);
+            if (result) {
+                Levels.Level curlevel = prelevels[i];
+                string curpath = levelPaths[i];
+                curlevel.levelPath = curpath;
+            } else {
+                levelPaths[i] = null;
+            }
+            Console.WriteLine(result);
         }
+        this.levels = prelevels.Where(c => c != null).ToArray();
+        levelPaths = levelPaths.Where(c => c != null).ToArray();
         this.maxPage = (int)System.Math.Ceiling((double)(this.levels.Length / maxLevelsPerPage));
 
         this.nextPageButton = new();
@@ -297,12 +304,10 @@ public class CertificateValidationScene : Scene {
     Button openUserCardButton;
     Button openLevelButton;
     Button openCertificateButton;
-    Label userCardPathView;
-    Label levelPathView;
-    Label certificatePathView;
-    string? certificatePath;
-    string? userCardPath;
-    string? levelPath;
+    TextBox userCardPathView;
+    TextBox levelPathView;
+    TextBox certificatePathView;
+    Button compareButton;
     Label Result;
     override public void init(SceneManager parent) {
         base.init(parent);
@@ -316,10 +321,118 @@ public class CertificateValidationScene : Scene {
         this.openUserCardButton.Text = "Select the user's personal card";
         this.openUserCardButton.Font = Textures.big_font;
 
+        this.userCardPathView = new();
+        this.userCardPathView.Anchor = (AnchorStyles.Top);
+        this.userCardPathView.Location = new(parent.Width / 2 - 300, 150);
+        this.userCardPathView.Width = 600;
+        this.userCardPathView.Height = 30;
+        this.userCardPathView.Text = "";
+        this.userCardPathView.Font = Textures.small_font;
+
+        this.openLevelButton = new();
+        this.openLevelButton.Anchor = (AnchorStyles.Top);
+        this.openLevelButton.Location = new(parent.Width / 2 - 300, 200);
+        this.openLevelButton.Width = 600;
+        this.openLevelButton.Height = 100;
+        this.openLevelButton.Click += this.openLevel;
+        this.openLevelButton.BackgroundImage = Textures.button_gray;
+        this.openLevelButton.Text = "Select the level";
+        this.openLevelButton.Font = Textures.big_font;
+
+        this.levelPathView = new();
+        this.levelPathView.Anchor = (AnchorStyles.Top);
+        this.levelPathView.Location = new(parent.Width / 2 - 300, 300);
+        this.levelPathView.Width = 600;
+        this.levelPathView.Height = 30;
+        this.levelPathView.Text = "";
+        this.levelPathView.Font = Textures.small_font;
+
+        this.openCertificateButton = new();
+        this.openCertificateButton.Anchor = (AnchorStyles.Top);
+        this.openCertificateButton.Location = new(parent.Width / 2 - 300, 350);
+        this.openCertificateButton.Width = 600;
+        this.openCertificateButton.Height = 100;
+        this.openCertificateButton.Click += this.openCertificate;
+        this.openCertificateButton.BackgroundImage = Textures.button_gray;
+        this.openCertificateButton.Text = "Select the certificate";
+        this.openCertificateButton.Font = Textures.big_font;
+
+        this.certificatePathView = new();
+        this.certificatePathView.Anchor = (AnchorStyles.Top);
+        this.certificatePathView.Location = new(parent.Width / 2 - 300, 450);
+        this.certificatePathView.Width = 600;
+        this.certificatePathView.Height = 30;
+        this.certificatePathView.Text = "";
+        this.certificatePathView.Font = Textures.small_font; 
+
+        this.compareButton = new();
+        this.compareButton.Anchor = (AnchorStyles.Top);
+        this.compareButton.Location = new(parent.Width / 2 - 300, 350);
+        this.compareButton.Width = 600;
+        this.compareButton.Height = 100;
+        this.compareButton.Click += this.compare;
+        this.compareButton.BackgroundImage = Textures.button_green;
+        this.compareButton.Text = "Validate";
+        this.compareButton.Font = Textures.big_font;
+
         parent.Controls.Add(openUserCardButton);
+        parent.Controls.Add(userCardPathView);
+        parent.Controls.Add(openLevelButton);
+        parent.Controls.Add(levelPathView);
+        parent.Controls.Add(openCertificateButton);
+        parent.Controls.Add(certificatePathView);
+        parent.Controls.Add(compareButton);
+    }
+
+    void compare(object sender, EventArgs e) {
+
     }
     void openUserCard(object sender, EventArgs e) {
 
+        using (OpenFileDialog openFileDialog = new OpenFileDialog())
+        {
+            openFileDialog.InitialDirectory = @"/gamedata/profile";
+            openFileDialog.Filter = "Card files (*.card)|*.card|All files (*.*)|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.RestoreDirectory = true;
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                this.userCardPathView.Text = openFileDialog.FileName;
+            }
+        }
+    }
+
+    void openLevel(object sender, EventArgs e) {
+
+        using (OpenFileDialog openFileDialog = new OpenFileDialog())
+        {
+            openFileDialog.InitialDirectory = @"/gamedata/levels";
+            openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.RestoreDirectory = true;
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                this.levelPathView.Text = openFileDialog.FileName;
+            }
+        }
+    }
+
+    void openCertificate(object sender, EventArgs e) {
+
+        using (OpenFileDialog openFileDialog = new OpenFileDialog())
+        {
+            openFileDialog.InitialDirectory = @"/gamedata/certificates";
+            openFileDialog.Filter = "Certificate files (*.certificate)|*.certificate|All files (*.*)|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.RestoreDirectory = true;
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                this.certificatePathView.Text = openFileDialog.FileName;
+            }
+        }
     }
 }
 
