@@ -13,7 +13,7 @@ static class Program
         int i = userName.LastIndexOf('\\');
         userName = userName.Substring(i + 1, userName.Length - i - 1);
 
-        string path = @"gamedata/profile/" + userName + "_card";
+        string path = @"gamedata/profile/" + userName + ".card";
         if (!File.Exists(path)) {
             System.Security.Cryptography.RNGCryptoServiceProvider rngCsp = new();
             System.IO.Directory.CreateDirectory(@"gamedata/profile/");

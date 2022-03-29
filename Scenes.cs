@@ -59,11 +59,23 @@ public class GameScene : Scene {
         this.parent.openScene(new GameScene(this.level));
     }
 
+    public void openCertificate(object sender, EventArgs e) {
+        string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+        int i = userName.LastIndexOf('\\');
+        userName = userName.Substring(i + 1, userName.Length - i - 1);
+        string path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\" + this.level.certificatePath(userName).Replace('/', '\\');
+        System.Diagnostics.Process.Start("explorer.exe" , @"/select," + path);
+    }
+
     public void win() {
         System.Media.SoundPlayer temp = new System.Media.SoundPlayer(@"resources/win.wav");
         temp.Play();
         this.Active = false;
         this.levelViewer.Enabled = false;
+        string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+        int i = userName.LastIndexOf('\\');
+        userName = userName.Substring(i + 1, userName.Length - i - 1);
+        this.level.createCertificateFile(userName);
 
         this.backToTheMenuButton = new();
         this.backToTheMenuButton.Location = new(410, 0);
@@ -80,9 +92,9 @@ public class GameScene : Scene {
         this.firstButton.Width = 200;
         this.firstButton.Height = 100;
         this.firstButton.Text = "View certificate";
-        this.firstButton.Click += this.retry;
         this.firstButton.BackgroundImage = Textures.button_golden;
         this.firstButton.Font = Textures.big_font;
+        this.firstButton.Click += this.openCertificate;
         parent.Controls.Add(this.firstButton);
     }
     public void fail() {
@@ -281,9 +293,40 @@ public class LevelSelectScene : Scene {
 
 }
 
+public class CertificateValidationScene : Scene {
+    Button openUserCardButton;
+    Button openLevelButton;
+    Button openCertificateButton;
+    Label userCardPathView;
+    Label levelPathView;
+    Label certificatePathView;
+    string? certificatePath;
+    string? userCardPath;
+    string? levelPath;
+    Label Result;
+    override public void init(SceneManager parent) {
+        base.init(parent);
+        this.openUserCardButton = new();
+        this.openUserCardButton.Anchor = (AnchorStyles.Top);
+        this.openUserCardButton.Location = new(parent.Width / 2 - 300, 50);
+        this.openUserCardButton.Width = 600;
+        this.openUserCardButton.Height = 100;
+        this.openUserCardButton.Click += this.openUserCard;
+        this.openUserCardButton.BackgroundImage = Textures.button_gray;
+        this.openUserCardButton.Text = "Select the user's personal card";
+        this.openUserCardButton.Font = Textures.big_font;
+
+        parent.Controls.Add(openUserCardButton);
+    }
+    void openUserCard(object sender, EventArgs e) {
+
+    }
+}
+
 public class MenuScene : Scene {
     Button gameStart;
     Button exit;
+    Button certificateValidator;
     PictureBox logo;
     override public void init(SceneManager parent) {
         base.init(parent);
@@ -300,14 +343,24 @@ public class MenuScene : Scene {
         this.gameStart.Location = new(parent.Width / 2 - 300, 300);
         this.gameStart.Width = 600;
         this.gameStart.Height = 100;
-        this.gameStart.Click += this.openTestScene;
+        this.gameStart.Click += this.startGame;
         this.gameStart.BackgroundImage = Textures.button_gray;
         this.gameStart.Text = "Play";
         this.gameStart.Font = Textures.big_font;
 
+        this.certificateValidator = new();
+        this.certificateValidator.Anchor = (AnchorStyles.Top);
+        this.certificateValidator.Location = new(parent.Width / 2 - 300, 400);
+        this.certificateValidator.Width = 600;
+        this.certificateValidator.Height = 100;
+        this.certificateValidator.Click += this.certificates;
+        this.certificateValidator.BackgroundImage = Textures.button_gray;
+        this.certificateValidator.Text = "Certificate validator";
+        this.certificateValidator.Font = Textures.big_font;
+
         this.exit = new();
         this.exit.Anchor = (AnchorStyles.Top);
-        this.exit.Location = new(parent.Width / 2 - 300, 400);
+        this.exit.Location = new(parent.Width / 2 - 300, 500);
         this.exit.Width = 600;
         this.exit.Height = 100;
         this.exit.Click += this.exitAction;
@@ -321,12 +374,17 @@ public class MenuScene : Scene {
 
         parent.Controls.Add(gameStart);
         parent.Controls.Add(exit);
+        parent.Controls.Add(certificateValidator);
     }
 
-    public void openTestScene(object sender, EventArgs e) {
+    public void startGame(object sender, EventArgs e) {
         this.parent.openScene(new LevelSelectScene());
     }    
 
+
+public void certificates(object sender, EventArgs e) {
+        this.parent.openScene(new CertificateValidationScene());
+    }   
     public void exitAction(object sender, EventArgs e) {
         this.close();
         Application.Exit();

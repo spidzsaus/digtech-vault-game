@@ -29,7 +29,6 @@ class ConnectionQueueSlot {
     public PlainPipe connection { get; set; }
 }
 
-public enum ValidationMode {UltraMegaHard, SoftCard};
 public class Level {
     public Scheme scheme; 
     public string levelName;
@@ -37,11 +36,8 @@ public class Level {
     public string? levelPath;
     byte[]? levelCode = null;
 
-    public byte[] generateCertificate(ValidationMode mode) {
-        string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-        int ind = userName.LastIndexOf('\\');
-        userName = userName.Substring(ind + 1, userName.Length - ind - 1);
-        string id = System.IO.File.ReadAllText(@"gamedata/profile/" + userName + "_card");
+    public byte[] generateCertificate(string card_path) {
+        byte[] id = System.IO.File.ReadAllBytes(card_path);
         System.Security.Cryptography.HashAlgorithm algo = new System.Security.Cryptography.SHA256Managed();
         
         if (levelCode == null) {
@@ -59,7 +55,7 @@ public class Level {
 
         for (int i = 0; i < id.Length; i++)
         {
-            bytes1[i] = ((byte)id[i]);
+            bytes1[i] = id[i];
         }
         for (int i = 0; i < levelCode.Length; i++)
         {
@@ -119,6 +115,35 @@ public class Level {
                 bytes[i] = ((byte)body[i]);
             }
             this.levelCode = algo.ComputeHash(bytes); 
+        }
+    }
+    public string certificatePath(string login) {
+        string levelFileName = levelPath;
+        int j = levelFileName.LastIndexOf('/');
+        levelFileName = levelFileName.Substring(j + 1, levelFileName.Length - j - 1);
+
+        string path = @"gamedata/certificates/" + login + "/" + levelFileName + ".certificate";
+        return path;
+    }
+    public void createCertificateFile(string login) {
+        string path = this.certificatePath(login);
+        System.IO.Directory.CreateDirectory(@"gamedata/certificates/" + login + "/");
+
+        byte[] certificate = this.generateCertificate(@"gamedata/profile/" + login + ".card");
+        using (FileStream fs = File.Create(path))
+        {
+            fs.Write(certificate, 0, certificate.Length);
+        }
+    
+    }
+
+    public bool validateCertificate(string path, string card_path) {
+        if (!File.Exists(path)) {
+            return false;
+        } else {
+            byte[] test = System.IO.File.ReadAllBytes(path);
+            byte[] actualCertificate = this.generateCertificate(card_path);
+            return test == actualCertificate;
         }
     }
 
