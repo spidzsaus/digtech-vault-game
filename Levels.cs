@@ -108,7 +108,7 @@ public class Level {
                 }
 
                 this.scheme.compile();
-                System.Security.Cryptography.HashAlgorithm algo = new System.Security.Cryptography.SHA256Managed();
+                /*System.Security.Cryptography.HashAlgorithm algo = new System.Security.Cryptography.SHA256Managed();
                 string body = json;
                 byte[] bytes = new byte[body.Length];
 
@@ -116,9 +116,9 @@ public class Level {
                 {
                     bytes[i] = ((byte)body[i]);
                 }
-                this.levelCode = algo.ComputeHash(bytes); 
+                this.levelCode = algo.ComputeHash(bytes); */
             }
-            return false;
+            return true;
         }
         catch (System.Text.Json.JsonException)
         {
@@ -151,7 +151,10 @@ public class Level {
         } else {
             byte[] test = System.IO.File.ReadAllBytes(path);
             byte[] actualCertificate = this.generateCertificate(card_path);
-            return test == actualCertificate;
+            Console.WriteLine(test[0]);
+            Console.WriteLine(actualCertificate[0]);
+            
+            return test.SequenceEqual(actualCertificate);
         }
     }
 

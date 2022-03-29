@@ -243,7 +243,6 @@ public class LevelSelectScene : Scene {
                                             System.IO.SearchOption.TopDirectoryOnly);
         System.Array.Sort(levelPaths);
         Levels.Level[] prelevels = new Levels.Level[levelPaths.Length];
-        Console.WriteLine(true);
         for (int i = 0; i < levelPaths.Length; i++)
         {
             prelevels[i] = new();
@@ -254,6 +253,7 @@ public class LevelSelectScene : Scene {
                 curlevel.levelPath = curpath;
             } else {
                 levelPaths[i] = null;
+                prelevels[i] = null;
             }
             Console.WriteLine(result);
         }
@@ -308,7 +308,7 @@ public class CertificateValidationScene : Scene {
     TextBox levelPathView;
     TextBox certificatePathView;
     Button compareButton;
-    Label Result;
+    Label resultMessage;
     override public void init(SceneManager parent) {
         base.init(parent);
         this.openUserCardButton = new();
@@ -367,13 +367,23 @@ public class CertificateValidationScene : Scene {
 
         this.compareButton = new();
         this.compareButton.Anchor = (AnchorStyles.Top);
-        this.compareButton.Location = new(parent.Width / 2 - 300, 350);
+        this.compareButton.Location = new(parent.Width / 2 - 300, 600);
         this.compareButton.Width = 600;
         this.compareButton.Height = 100;
         this.compareButton.Click += this.compare;
         this.compareButton.BackgroundImage = Textures.button_green;
         this.compareButton.Text = "Validate";
         this.compareButton.Font = Textures.big_font;
+
+        this.resultMessage = new();
+        this.resultMessage.Anchor = (AnchorStyles.Top);
+        this.resultMessage.Location = new(parent.Width / 2 - 300, 700);
+        this.resultMessage.Width = 600;
+        this.resultMessage.Height = 50;
+        this.resultMessage.Click += this.compare;
+        this.resultMessage.BackgroundImage = Textures.button_gray;
+        this.resultMessage.Text = "Validation result";
+        this.resultMessage.Font = Textures.big_font;
 
         parent.Controls.Add(openUserCardButton);
         parent.Controls.Add(userCardPathView);
@@ -382,10 +392,25 @@ public class CertificateValidationScene : Scene {
         parent.Controls.Add(openCertificateButton);
         parent.Controls.Add(certificatePathView);
         parent.Controls.Add(compareButton);
+        parent.Controls.Add(resultMessage);
     }
 
     void compare(object sender, EventArgs e) {
-
+        Levels.Level subject = new();
+        bool result = File.Exists(this.levelPathView.Text) && File.Exists(this.certificatePathView.Text) && File.Exists(this.userCardPathView.Text);
+        if (result) {
+            result = subject.fromJson(System.IO.File.ReadAllText(this.levelPathView.Text), false);
+            if (result) {
+                result = subject.validateCertificate(this.certificatePathView.Text, this.userCardPathView.Text);
+            }
+        }
+        if (result) {
+            this.resultMessage.BackgroundImage = Textures.button_green;
+            this.resultMessage.Text = "Certificate is valid!";
+        } else {
+            this.resultMessage.BackgroundImage = Textures.button_reddish;
+            this.resultMessage.Text = "Certificate is invalid!";
+        }
     }
     void openUserCard(object sender, EventArgs e) {
 
