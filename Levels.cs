@@ -38,22 +38,13 @@ public class Level {
     byte[]? levelCode = null;
 
     public byte[] generateCertificate(ValidationMode mode) {
-        string id = "";
-        if (mode == ValidationMode.UltraMegaHard) {
-            /*var mbs = new System.Management.ManagementObjectSearcher("Select ProcessorId From Win32_processor");
-            System.Management.ManagementObjectCollection mbsList = mbs.Get();
-            foreach (System.Management.ManagementObject mo in mbsList)
-            {
-                id = mo["ProcessorId"].ToString();
-                break;
-            }*/
-            
-        } else {
-            string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            id = System.IO.File.ReadAllText(@"gamedata/profile/" + userName + "_card");
-        }
+        string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+        int ind = userName.LastIndexOf('\\');
+        userName = userName.Substring(ind + 1, userName.Length - ind - 1);
+        string id = System.IO.File.ReadAllText(@"gamedata/profile/" + userName + "_card");
+        System.Security.Cryptography.HashAlgorithm algo = new System.Security.Cryptography.SHA256Managed();
+        
         if (levelCode == null) {
-            System.Security.Cryptography.HashAlgorithm algo = new System.Security.Cryptography.SHA256Managed();
             string body = this.toJson();
             byte[] bytes = new byte[body.Length];
 
@@ -63,15 +54,18 @@ public class Level {
             }
             this.levelCode = algo.ComputeHash(bytes); 
         }
-        string code = id + levelCode;
-        System.Security.Cryptography.HashAlgorithm algorithm = new System.Security.Cryptography.SHA256Managed();
-        byte[] bytes1 = new byte[code.Length];
 
-        for (int i = 0; i < code.Length; i++)
+        byte[] bytes1 = new byte[id.Length + levelCode.Length];
+
+        for (int i = 0; i < id.Length; i++)
         {
-            bytes1[i] = ((byte)code[i]);
+            bytes1[i] = ((byte)id[i]);
         }
-        return algorithm.ComputeHash(bytes1); 
+        for (int i = 0; i < levelCode.Length; i++)
+        {
+            bytes1[id.Length + i] = levelCode[i];
+        }
+        return algo.ComputeHash(bytes1); 
     }
 
     public void init(){
