@@ -31,7 +31,7 @@ partial class Form1
         this.components = new System.ComponentModel.Container();
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(800, 800);
-        this.Text = "ЦифТех: Взлом Сейфа";
+        this.Text = "DigTech: Logic Gates";
     }
 
     #endregion

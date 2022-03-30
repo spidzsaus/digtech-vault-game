@@ -5,20 +5,26 @@ using Textures;
 
 public class SceneManager : Panel {
     public SceneManager() : base() {
-        this.BackgroundImage = Textures.bath_tile;
+        //this.BackgroundImage = Textures.bath_tile;
+        this.BackColor = Color.FromArgb(172, 213, 207);
     }
     Scene? scene;
     public System.Media.SoundPlayer player;
     public void openScene(Scene scene) {
+        this.Parent.SuspendLayout();
         if (this.scene is not null) {
             this.scene.close();
         }
         this.scene = scene;
         this.scene.init(this);
+        this.Parent.ResumeLayout();
+
     }
     override protected void OnResize(EventArgs e) {
         base.OnResize(e);
+        this.SuspendLayout();
         if (this.scene != null) this.scene.resize();
+        this.ResumeLayout();
     }
 }
 
@@ -85,7 +91,6 @@ public class GameScene : Scene {
         this.backToTheMenuButton.Click += this.backToTheMenu;
         this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
         this.backToTheMenuButton.Font = Textures.big_font;
-        parent.Controls.Add(this.backToTheMenuButton);
 
         this.firstButton = new();
         this.firstButton.Location = new(210, 0);
@@ -95,6 +100,7 @@ public class GameScene : Scene {
         this.firstButton.BackgroundImage = Textures.button_golden;
         this.firstButton.Font = Textures.big_font;
         this.firstButton.Click += this.openCertificate;
+        parent.Controls.Add(this.backToTheMenuButton);
         parent.Controls.Add(this.firstButton);
     }
     public void fail() {
@@ -111,7 +117,6 @@ public class GameScene : Scene {
         this.backToTheMenuButton.Click += this.backToTheMenu;
         this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
         this.backToTheMenuButton.Font = Textures.big_font;
-        parent.Controls.Add(this.backToTheMenuButton);
 
         this.firstButton = new();
         this.firstButton.Location = new(210, 0);
@@ -121,6 +126,7 @@ public class GameScene : Scene {
         this.firstButton.Click += this.retry;
         this.firstButton.BackgroundImage = Textures.button_golden;
         this.firstButton.Font = Textures.big_font;
+        parent.Controls.Add(this.backToTheMenuButton);
         parent.Controls.Add(this.firstButton);
     }
     public void commit(object sender, EventArgs e) {
@@ -139,9 +145,15 @@ public class GameScene : Scene {
         }
 
     }
+    public int optimalScale() {
+        int HoverA = (parent.Height - 100) / (this.level.scheme.getRangeY() + 1);
+        int WoverB = parent.Width / (this.level.scheme.getRangeX() + 1);
+        return (int)((HoverA < WoverB ? HoverA : WoverB) / 1.5);
+    }
+
     public override void resize()
     {
-        this.levelViewer.configure(10, 10, (parent.Width < parent.Height ? parent.Width : parent.Height) / 8);
+        this.levelViewer.configure(10, 10, this.optimalScale());
 
     }
     public override void init(SceneManager parent)
@@ -151,8 +163,9 @@ public class GameScene : Scene {
         this.turnsLeft = this.level.turns;
         this.levelViewer = new(this);
         this.levelViewer.Location = new(0, 100);
-        this.levelViewer.configure(10, 10, (parent.Width < parent.Height ? parent.Width : parent.Height) / 8);
+        this.levelViewer.configure(10, 10, this.optimalScale());
         this.levelViewer.openLevel(this.level);
+        this.levelViewer.BackColor = Color.Linen;
         //this.levelViewer.Anchor = (AnchorStyles.Bottom);
 
         this.commitButton = new();
@@ -185,7 +198,7 @@ public class LevelSelectScene : Scene {
     Button backToTheMenuButton;
     int maxPage;
     int currentPage;
-    static int maxLevelsPerPage = 4;
+    static int maxLevelsPerPage = 6;
     public void backToTheMenu(object sender, EventArgs e) {
         this.parent.openScene(new MenuScene());
     }
@@ -194,6 +207,7 @@ public class LevelSelectScene : Scene {
         int finish = (int)(start + maxLevelsPerPage);
         if (finish > levels.Length) finish = levels.Length;
 
+        this.parent.SuspendLayout();
         if (this.levelButtons != null) {
             foreach (Button item in levelButtons)
             {
@@ -221,6 +235,7 @@ public class LevelSelectScene : Scene {
             this.levelButtons[j].Font = Textures.big_font;
             parent.Controls.Add(this.levelButtons[j]);
         }
+        this.parent.ResumeLayout();
     }
 
     public void nextPage(object sender, EventArgs e) {
@@ -255,7 +270,6 @@ public class LevelSelectScene : Scene {
                 levelPaths[i] = null;
                 prelevels[i] = null;
             }
-            Console.WriteLine(result);
         }
         this.levels = prelevels.Where(c => c != null).ToArray();
         levelPaths = levelPaths.Where(c => c != null).ToArray();
@@ -270,7 +284,6 @@ public class LevelSelectScene : Scene {
         this.nextPageButton.Anchor = (AnchorStyles.Bottom | AnchorStyles.Right);
         this.nextPageButton.Location = new(parent.Width - 200, parent.Height - 180);
         this.nextPageButton.Font = Textures.big_font;
-        parent.Controls.Add(this.nextPageButton);
 
         this.prevPageButton = new();
         this.prevPageButton.Click += this.prevPage;
@@ -280,9 +293,7 @@ public class LevelSelectScene : Scene {
         this.prevPageButton.Height = 180;
         this.prevPageButton.Anchor = (AnchorStyles.Bottom | AnchorStyles.Left);
         this.prevPageButton.Location = new(0, parent.Height - 180);
-        this.prevPageButton.Enabled = false;
         this.prevPageButton.Font = Textures.big_font;
-        parent.Controls.Add(this.prevPageButton);
 
         this.backToTheMenuButton = new();
         this.backToTheMenuButton.Anchor = AnchorStyles.Bottom;
@@ -293,7 +304,11 @@ public class LevelSelectScene : Scene {
         this.backToTheMenuButton.Click += this.backToTheMenu;
         this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
         this.backToTheMenuButton.Font = Textures.big_font;
+        parent.Controls.Add(this.nextPageButton);
+        parent.Controls.Add(this.prevPageButton);
         parent.Controls.Add(this.backToTheMenuButton);
+        this.nextPageButton.Enabled = (currentPage < this.maxPage);
+        this.prevPageButton.Enabled = (currentPage > 0);
 
         openPage(0);
     }
@@ -388,8 +403,8 @@ public class CertificateValidationScene : Scene {
 
         this.backToTheMenuButton = new();
         this.backToTheMenuButton.Anchor = (AnchorStyles.Right | AnchorStyles.Top);
-        this.backToTheMenuButton.Location = new(parent.Width - 100, 0);
-        this.backToTheMenuButton.Width = 100;
+        this.backToTheMenuButton.Location = new(parent.Width - 150, 0);
+        this.backToTheMenuButton.Width = 150;
         this.backToTheMenuButton.Height = 100;
         this.backToTheMenuButton.Text = "Back";
         this.backToTheMenuButton.Click += this.backToTheMenu;
@@ -486,7 +501,7 @@ public class MenuScene : Scene {
         this.logo = new PictureBox();            
         this.logo.ImageLocation = @"resources/logo.png";
         this.logo.SizeMode = PictureBoxSizeMode.AutoSize;
-        this.logo.BackgroundImage = Textures.bath_tile;
+        //this.logo.BackgroundImage = Textures.bath_tile;
         this.logo.Anchor = AnchorStyles.Top;
         this.logo.Location = new(parent.Width / 2 - 350, 0);
         parent.Controls.Add(this.logo);

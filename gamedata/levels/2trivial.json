@@ -1,5 +1,5 @@
 {
-  "name": "Test 2",
+  "name": "Trivial",
   "body": {
     "0": {
       "type": "inp",
@@ -93,7 +93,7 @@
       ]
     },
     "7": {
-      "type": "xor",
+      "type": "xnor",
       "visible": false,
       "X": 3,
       "Y": 2,

@@ -1,5 +1,5 @@
 {
-  "name": "Test 3",
+  "name": "Nightmare Extreme",
   "body": {
     "0": {
       "type": "inp",
@@ -10,7 +10,7 @@
         {
           "from_slot": 0,
           "to_slot": 0,
-          "destination": 5
+          "destination": 6
         }
       ]
     },
@@ -23,7 +23,7 @@
         {
           "from_slot": 0,
           "to_slot": 1,
-          "destination": 5
+          "destination": 7
         }
       ]
     },
@@ -35,8 +35,13 @@
       "output": [
         {
           "from_slot": 0,
+          "to_slot": 1,
+          "destination": 8
+        },
+        {
+          "from_slot": 0,
           "to_slot": 0,
-          "destination": 4
+          "destination": 10
         }
       ]
     },
@@ -44,46 +49,33 @@
       "type": "inp",
       "visible": true,
       "X": 0,
-      "Y": 1,
-      "output": [
-        {
-          "from_slot": 0,
-          "to_slot": 1,
-          "destination": 6
-        }
-      ]
-    },
-    "4": {
-      "type": "not",
-      "visible": true,
-      "X": 2,
-      "Y": 3,
-      "output": [
-        {
-          "from_slot": 0,
-          "to_slot": 1,
-          "destination": 7
-        }
-      ]
-    },
-    "5": {
-      "type": "xor",
-      "visible": true,
-      "X": 1,
-      "Y": 0,
+      "Y": 4,
       "output": [
         {
           "from_slot": 0,
           "to_slot": 0,
-          "destination": 6
+          "destination": 9
+        }
+      ]
+    },
+    "4": {
+      "type": "inp",
+      "visible": true,
+      "X": 0,
+      "Y": 6,
+      "output": [
+        {
+          "from_slot": 0,
+          "to_slot": 1,
+          "destination": 9
         }
       ]
     },
     "6": {
-      "type": "and",
-      "visible": true,
-      "X": 2,
-      "Y": 1,
+      "type": "buf",
+      "visible": false,
+      "X": 1,
+      "Y": 0,
       "output": [
         {
           "from_slot": 0,
@@ -95,22 +87,81 @@
     "7": {
       "type": "xor",
       "visible": false,
-      "X": 3,
-      "Y": 2,
+      "X": 2,
+      "Y": 1,
       "output": [
         {
           "from_slot": 0,
           "to_slot": 0,
           "destination": 8
+        },
+        {
+          "from_slot": 0,
+          "to_slot": 0,
+          "destination": 12
         }
       ]
     },
     "8": {
+      "type": "and",
+      "visible": false,
+      "X": 4,
+      "Y": 2,
+      "output": [
+        {
+          "from_slot": 0,
+          "to_slot": 0,
+          "destination": 11
+        }
+      ]
+    },
+    "9": {
+      "type": "xor",
+      "visible": false,
+      "X": 1,
+      "Y": 5,
+      "output": [
+        {
+          "from_slot": 0,
+          "to_slot": 1,
+          "destination": 10
+        }
+      ]
+    },
+    "10": {
+      "type": "xnor",
+      "visible": false,
+      "X": 3,
+      "Y": 4,
+      "output": [
+        {
+          "from_slot": 0,
+          "to_slot": 0,
+          "destination": 13
+        }
+      ]
+    },
+    "11": {
       "type": "lamp",
       "visible": true,
-      "X": 4,
+      "X": 6,
+      "Y": 2,
+      "output": []
+    },
+    "12": {
+      "type": "lamp",
+      "visible": true,
+      "X": 6,
       "Y": 1,
       "output": []
+    },
+    "13": {
+      "type": "lamp",
+      "visible": true,
+      "X": 6,
+      "Y": 4,
+      "output": []
     }
+
   }
 }

@@ -1,0 +1,52 @@
+{
+  "name": "Quick start",
+  "body": {
+    "0": {
+      "type": "inp",
+      "visible": true,
+      "X": 0,
+      "Y": 0,
+      "output": [
+        {
+          "from_slot": 0,
+          "to_slot": 0,
+          "destination": 3
+        }
+      ]
+    },
+    "1": {
+      "type": "inp",
+      "visible": true,
+      "X": 0,
+      "Y": 2,
+      "output": [
+        {
+          "from_slot": 0,
+          "to_slot": 1,
+          "destination": 3
+        }
+      ]
+    },
+    "3": {
+      "type": "and",
+      "visible": false,
+      "X": 1,
+      "Y": 1,
+      "output": [
+        {
+          "from_slot": 0,
+          "to_slot": 0,
+          "destination": 4
+        }
+      ]
+    },
+    "4": {
+      "type": "lamp",
+      "visible": true,
+      "X": 2,
+      "Y": 1,
+      "output": [
+      ]
+    }
+  }
+}
