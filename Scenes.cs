@@ -138,7 +138,7 @@ public class GameScene : Scene {
             this.win();
         } else {
             if (this.turnsLeft >= 0) {
-                this.commitButton.Text = "Commit (" + this.turnsLeft.ToString() + ")";
+                this.commitButton.Text = "Run (" + this.turnsLeft.ToString() + ")";
             } else {
                 this.fail();
             }
@@ -171,7 +171,7 @@ public class GameScene : Scene {
         this.commitButton = new();
         this.commitButton.Width = 200;
         this.commitButton.Height = 100;
-        this.commitButton.Text = "Commit (" + this.turnsLeft.ToString() + ")";
+        this.commitButton.Text = "Run (" + this.turnsLeft.ToString() + ")";
         this.commitButton.Click += this.commit;
         this.commitButton.Enabled = false;
         this.commitButton.BackgroundImage = Textures.button_green;
