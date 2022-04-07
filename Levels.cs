@@ -4,6 +4,11 @@ using GameComponents;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+/* class PlainCertificate {
+    public string token;
+    public string owner;
+    public string 
+} */
 class PlainPipe {
     public int from_slot  { get; set; }
     public int to_slot { get; set; }

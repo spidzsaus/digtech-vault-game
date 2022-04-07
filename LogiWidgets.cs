@@ -16,6 +16,7 @@ public class LevelViewer : Panel {
         this.standart = DrawStandart.IEC;
         this.MouseClick += panelClick;
         this.scene = scene;
+        this.DoubleBuffered = true;
     }
     protected override void OnResize(EventArgs e) {
         base.OnResize(e);
