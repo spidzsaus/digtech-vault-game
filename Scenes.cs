@@ -316,52 +316,13 @@ public class LevelSelectScene : Scene {
 }
 
 public class CertificateValidationScene : Scene {
-    Button openUserCardButton;
-    Button openLevelButton;
     Button backToTheMenuButton;
     Button openCertificateButton;
-    TextBox userCardPathView;
-    TextBox levelPathView;
     TextBox certificatePathView;
     Button compareButton;
     Label resultMessage;
     override public void init(SceneManager parent) {
         base.init(parent);
-        this.openUserCardButton = new();
-        this.openUserCardButton.Anchor = (AnchorStyles.Top);
-        this.openUserCardButton.Location = new(parent.Width / 2 - 300, 50);
-        this.openUserCardButton.Width = 600;
-        this.openUserCardButton.Height = 100;
-        this.openUserCardButton.Click += this.openUserCard;
-        this.openUserCardButton.BackgroundImage = Textures.button_gray;
-        this.openUserCardButton.Text = "Select the user's personal card";
-        this.openUserCardButton.Font = Textures.big_font;
-
-        this.userCardPathView = new();
-        this.userCardPathView.Anchor = (AnchorStyles.Top);
-        this.userCardPathView.Location = new(parent.Width / 2 - 300, 150);
-        this.userCardPathView.Width = 600;
-        this.userCardPathView.Height = 30;
-        this.userCardPathView.Text = "";
-        this.userCardPathView.Font = Textures.small_font;
-
-        this.openLevelButton = new();
-        this.openLevelButton.Anchor = (AnchorStyles.Top);
-        this.openLevelButton.Location = new(parent.Width / 2 - 300, 200);
-        this.openLevelButton.Width = 600;
-        this.openLevelButton.Height = 100;
-        this.openLevelButton.Click += this.openLevel;
-        this.openLevelButton.BackgroundImage = Textures.button_gray;
-        this.openLevelButton.Text = "Select the level";
-        this.openLevelButton.Font = Textures.big_font;
-
-        this.levelPathView = new();
-        this.levelPathView.Anchor = (AnchorStyles.Top);
-        this.levelPathView.Location = new(parent.Width / 2 - 300, 300);
-        this.levelPathView.Width = 600;
-        this.levelPathView.Height = 30;
-        this.levelPathView.Text = "";
-        this.levelPathView.Font = Textures.small_font;
 
         this.openCertificateButton = new();
         this.openCertificateButton.Anchor = (AnchorStyles.Top);
@@ -412,10 +373,6 @@ public class CertificateValidationScene : Scene {
         this.backToTheMenuButton.Font = Textures.big_font;
         parent.Controls.Add(this.backToTheMenuButton);
 
-        parent.Controls.Add(openUserCardButton);
-        parent.Controls.Add(userCardPathView);
-        parent.Controls.Add(openLevelButton);
-        parent.Controls.Add(levelPathView);
         parent.Controls.Add(openCertificateButton);
         parent.Controls.Add(certificatePathView);
         parent.Controls.Add(compareButton);
@@ -426,13 +383,9 @@ public class CertificateValidationScene : Scene {
     }
 
     void compare(object sender, EventArgs e) {
-        Levels.Level subject = new();
-        bool result = File.Exists(this.levelPathView.Text) && File.Exists(this.certificatePathView.Text) && File.Exists(this.userCardPathView.Text);
+        bool result = File.Exists(this.certificatePathView.Text);
         if (result) {
-            result = subject.fromJson(System.IO.File.ReadAllText(this.levelPathView.Text), false);
-            if (result) {
-                result = subject.validateCertificate(this.certificatePathView.Text, this.userCardPathView.Text);
-            }
+            result = Levels.CertificateManager.validateCertificate(this.certificatePathView.Text);
         }
         if (result) {
             this.resultMessage.BackgroundImage = Textures.button_green;
@@ -440,37 +393,6 @@ public class CertificateValidationScene : Scene {
         } else {
             this.resultMessage.BackgroundImage = Textures.button_reddish;
             this.resultMessage.Text = "Certificate is invalid!";
-        }
-    }
-    void openUserCard(object sender, EventArgs e) {
-
-        using (OpenFileDialog openFileDialog = new OpenFileDialog())
-        {
-            openFileDialog.InitialDirectory = @"/gamedata/profile";
-            openFileDialog.Filter = "Card files (*.card)|*.card|All files (*.*)|*.*";
-            openFileDialog.FilterIndex = 1;
-            openFileDialog.RestoreDirectory = true;
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                this.userCardPathView.Text = openFileDialog.FileName;
-            }
-        }
-    }
-
-    void openLevel(object sender, EventArgs e) {
-
-        using (OpenFileDialog openFileDialog = new OpenFileDialog())
-        {
-            openFileDialog.InitialDirectory = @"/gamedata/levels";
-            openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
-            openFileDialog.FilterIndex = 1;
-            openFileDialog.RestoreDirectory = true;
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                this.levelPathView.Text = openFileDialog.FileName;
-            }
         }
     }
 

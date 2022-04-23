@@ -4,11 +4,12 @@ using GameComponents;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-/* class PlainCertificate {
-    public string token;
-    public string owner;
-    public string 
-} */
+class PlainCertificate {
+    public string token { get; set; }
+    public string owner { get; set; }
+    public string level { get; set; }
+}
+
 class PlainPipe {
     public int from_slot  { get; set; }
     public int to_slot { get; set; }
@@ -34,27 +35,27 @@ class ConnectionQueueSlot {
     public PlainPipe connection { get; set; }
 }
 
-public class Level {
-    public Scheme scheme; 
-    public string levelName;
-    public int turns;
-    public string? levelPath;
-    byte[]? levelCode = null;
 
-    public byte[] generateCertificate(string card_path) {
-        byte[] id = System.IO.File.ReadAllBytes(card_path);
+static class CertificateManager {
+    static string xorcrypt (string text)
+    {
+        string key = "102392892831209";
+        var result = new System.Text.StringBuilder();
+        for (int c = 0; c < text.Length; c++)
+            result.Append((char)((uint)text[c] ^ (uint)key[c % key.Length]));
+        return result.ToString();
+    }
+
+    static public string generateCertificateToken(byte[] id,  string levelbody) {
         System.Security.Cryptography.HashAlgorithm algo = new System.Security.Cryptography.SHA256Managed();
-        
-        if (levelCode == null) {
-            string body = this.toJson();
-            byte[] bytes = new byte[body.Length];
+        string body = levelbody;
+        byte[] bytes = new byte[body.Length];
 
-            for (int i = 0; i < body.Length; i++)
-            {
-                bytes[i] = ((byte)body[i]);
-            }
-            this.levelCode = algo.ComputeHash(bytes); 
+        for (int i = 0; i < body.Length; i++)
+        {
+            bytes[i] = ((byte)body[i]);
         }
+        byte[] levelCode = algo.ComputeHash(bytes); 
 
         byte[] bytes1 = new byte[id.Length + levelCode.Length];
 
@@ -66,8 +67,58 @@ public class Level {
         {
             bytes1[id.Length + i] = levelCode[i];
         }
-        return algo.ComputeHash(bytes1); 
+        byte[] token = algo.ComputeHash(bytes1);
+        for (int i = 0; i < token.Length; i++)
+        {
+            token[i] = (byte)((int)(token[i]) % 128);
+        }
+        return System.Text.Encoding.Default.GetString(token);
     }
+
+    static public string generateCertificate(string card_name, string level_name) {
+        string card_path = @"gamedata/profile/" + card_name + ".card";
+        byte[] id = System.IO.File.ReadAllBytes(card_path);
+
+        string level_path = @"gamedata/levels/" + level_name;
+        string body = System.IO.File.ReadAllText(level_path);
+
+        string token = CertificateManager.generateCertificateToken(id, body);
+
+        PlainCertificate plain = new();
+        plain.token = token;
+        plain.owner = CertificateManager.xorcrypt(card_name);
+        plain.level = CertificateManager.xorcrypt(level_name);
+
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        string jsonString = JsonSerializer.Serialize(plain, options);
+        return jsonString;
+    }
+
+    static public bool validateCertificate(string path) {
+        if (!File.Exists(path)) {
+            return false;
+        } else {
+            
+            string json = System.IO.File.ReadAllText(path);
+            PlainCertificate pc = JsonSerializer.Deserialize<PlainCertificate>(json);
+            string test = pc.token;
+            string card_path = @"gamedata/profile/" + CertificateManager.xorcrypt(pc.owner) + ".card";
+            string level_path = @"gamedata/levels/" + CertificateManager.xorcrypt(pc.level);
+            byte[] id = System.IO.File.ReadAllBytes(card_path);
+            string body = System.IO.File.ReadAllText(level_path);
+            string actualCertificate = CertificateManager.generateCertificateToken(id, body);
+            
+            return test.SequenceEqual(actualCertificate);
+        }
+    }
+}
+
+public class Level {
+    public Scheme scheme; 
+    public string levelName;
+    public int turns;
+    public string? levelPath;
+    byte[]? levelCode = null;
 
     public void init(){
         int difficulty = 0;
@@ -141,26 +192,12 @@ public class Level {
     public void createCertificateFile(string login) {
         string path = this.certificatePath(login);
         System.IO.Directory.CreateDirectory(@"gamedata/certificates/" + login + "/");
+        string levelFileName = levelPath;
+        int j = levelFileName.LastIndexOf('/');
+        levelFileName = levelFileName.Substring(j + 1, levelFileName.Length - j - 1);
 
-        byte[] certificate = this.generateCertificate(@"gamedata/profile/" + login + ".card");
-        using (FileStream fs = File.Create(path))
-        {
-            fs.Write(certificate, 0, certificate.Length);
-        }
-    
-    }
-
-    public bool validateCertificate(string path, string card_path) {
-        if (!File.Exists(path)) {
-            return false;
-        } else {
-            byte[] test = System.IO.File.ReadAllBytes(path);
-            byte[] actualCertificate = this.generateCertificate(card_path);
-            Console.WriteLine(test[0]);
-            Console.WriteLine(actualCertificate[0]);
-            
-            return test.SequenceEqual(actualCertificate);
-        }
+        string certificate = CertificateManager.generateCertificate(login, levelFileName);
+        System.IO.File.WriteAllText(path, certificate);
     }
 
     public string toJson() {
