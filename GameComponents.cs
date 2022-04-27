@@ -71,6 +71,7 @@ abstract public class BaseGate
             int lineStartX = (int)(componentX + scale * 0.75f); 
             float lineStartReferenceY = componentY;
             foreach (List<Pipe> slot in this.recievers!) {
+            if (slot == null) continue;
             foreach (Pipe pipe in slot)
             {
                 if (!(pipe is null)) {
@@ -107,6 +108,7 @@ abstract public class BaseGate
             int lineStartX = (int)(componentX + scale * 0.75f); 
             float lineStartReferenceY = componentY;
             foreach (List<Pipe> slot in this.recievers!) {
+            if (slot == null) continue;
             foreach (Pipe pipe in slot)
             {
                 if (!(pipe is null)) {
@@ -159,6 +161,51 @@ abstract public class BaseGate
             }
         }
     }
+
+    public void draw(PaintEventArgs e, int x, int y, float scale, DrawStandart drawStandart, int? highlightInput, int? highlightOutput) {
+        if (drawStandart == DrawStandart.IEC) {
+            if (this.is_hidden) {
+                this.IECDrawHidden(e, x, y, scale);
+            } else { 
+                this.IECdraw(e, x, y, scale);
+            }
+        } else {
+            if (this.is_hidden) {
+                this.ANSIDrawHidden(e, x, y, scale);
+            } else { 
+                this.ANSIdraw(e, x, y, scale);
+            }
+        }
+        Pen pen = new Pen(Color.Black);
+        Pen pen2 = new Pen(Color.Green);
+        pen.Width = 5;
+        pen2.Width = 10;
+        float shift = scale * 1.5f;
+        int componentX = (int)(gamefieldX * shift + x);
+        int componentY = (int)(gamefieldY * shift + y);
+        for (int i = 0; i < this.output_slots; i++)
+        {
+            int lineStartX = (int)(componentX + scale * 0.75f); 
+            float lineStartReferenceY = componentY;
+            int lineStartY = (int)(lineStartReferenceY + ((i + 0.5f) * (scale / this.output_slots)));
+            e.Graphics.DrawLine(i == highlightOutput ? pen2 : pen,
+                                lineStartX,
+                                lineStartY,
+                                lineStartX + scale / 4,
+                                lineStartY);
+        }
+        for (int i = 0; i < this.input_slots; i++)
+        {
+            float lineStartReferenceY = componentY;
+            int lineStartY = (int)(lineStartReferenceY + ((i + 0.5f) * (scale / this.input_slots)));
+            e.Graphics.DrawLine(i == highlightInput ? pen2 : pen,
+                                componentX,
+                                lineStartY,
+                                componentX - scale / 4,
+                                lineStartY);
+        }
+        
+    }
     
     public void IECDrawHidden(PaintEventArgs e, int x, int y, float scale) {
         this.IECDrawTemplate(e, x, y, scale, " ?", false);
@@ -182,6 +229,7 @@ abstract public class BaseGate
 
     public void passForced(bool[] output) {
         foreach (List<Pipe> slot in this.recievers!) {
+        if (slot == null) continue;
         foreach (Pipe pipe in slot) {
             pipe.setState(output[pipe.source_slot]);
         }
@@ -191,6 +239,7 @@ abstract public class BaseGate
     public bool[] update() {
         bool[] input = new bool[input_slots];
         foreach (Pipe pipe in this.delivers!) {
+            if (pipe == null) continue;
             input.SetValue(pipe.state, pipe.dest_slot);
         }
         bool[] output = this.output(input);
@@ -201,12 +250,20 @@ abstract public class BaseGate
     public Pipe connect(BaseGate other, int from_slot, int to_slot) {
         Pipe bond = new Pipe(this, from_slot,
                              other, to_slot);
+    try
+    {
+        
         if (this.recievers![from_slot] == null) {
             this.recievers![from_slot] = new();
         }
         this.recievers![from_slot].Add(bond);
         other.delivers!.SetValue(bond, to_slot);
         return bond;
+    }
+    catch (System.IndexOutOfRangeException)
+    {
+        return null;
+    }
     }
 
     public int countParents(){
@@ -215,6 +272,7 @@ abstract public class BaseGate
         } else {
             int maxParentParents = 0;
             foreach (Pipe pipe in this.delivers!) {
+                if (pipe != null)
                 if (pipe.source.countParents() > maxParentParents) {
                     maxParentParents = pipe.source.countParents();
                 }
@@ -516,6 +574,7 @@ public class ButtonInputGate: BaseGate
         int lineStartX = (int)(componentX + scale);
             float lineStartReferenceY = componentY;
             foreach (List<Pipe> slot in this.recievers!) {
+            if (slot == null) continue;
             foreach (Pipe pipe in slot)
             {
                 if (!(pipe is null)) {
@@ -670,6 +729,10 @@ public class Scheme {
         gate.Parent = this;
     }
 
+    public void removeGate(BaseGate gate) {
+        this.schemeBody.Remove(gate);
+    }
+
     public Dictionary<bool[], bool[]> genTruthTable(){
         int inputSize = this.inputLayer.Count;
         int outputSize = this.outputLayer.Count;
@@ -690,8 +753,17 @@ public class Scheme {
     }
 }
 
-
-public class Alliases {
+static public class Alliases {
+    static public BaseGate createGateFromTypeName(string typename) {
+        Type GateType = Alliases.nameMeanings[typename];
+        dynamic gate = Activator.CreateInstance(GateType);
+        return gate;
+    }
+    static public BaseGate createGateFromTypeFullName(string typename) {
+        Type GateType = Alliases.fullnameMeanings[typename];
+        dynamic gate = Activator.CreateInstance(GateType);
+        return gate;
+    }
     static public Dictionary<Type, string> componentNames = new() 
     {
         {typeof(AndGate), "and"},
@@ -725,5 +797,18 @@ public class Alliases {
         {"logout", typeof(LogOutputGate)},
         {"lamp", typeof(LampOutputGate)},
         {"inp", typeof(ButtonInputGate)}
+    };
+    static public Dictionary<string, Type> fullnameMeanings = new() 
+    {
+        {"AND Gate &", typeof(AndGate)},
+        {"NOT Gate 1○", typeof(NotGate)},
+        {"BUF Gate 1", typeof(BufGate)},
+        {"NAND Gate &○", typeof(NandGate)},
+        {"OR Gate ⩾", typeof(OrGate)},
+        {"NOR Gate ⩾○", typeof(NorGate)},
+        {"XOR Gate =1", typeof(XorGate)},
+        {"XNOR Gate =1○", typeof(XnorGate)},
+        {"OUTPUT", typeof(LampOutputGate)},
+        {"INPUT", typeof(ButtonInputGate)}
     };
 }

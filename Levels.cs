@@ -119,6 +119,10 @@ public class Level {
     public int turns;
     public string? levelPath;
     byte[]? levelCode = null;
+    public Level() {
+        this.levelName = "My Level";
+        this.scheme = new();
+    }    
 
     public void init(){
         int difficulty = 0;
@@ -142,8 +146,7 @@ public class Level {
                 foreach (KeyValuePair<int, PlainBaseComponent> entry in pl.body)
                 {   
                     PlainBaseComponent pb = entry.Value;
-                    Type GateType = Alliases.nameMeanings[pb.type];
-                    dynamic gate = Activator.CreateInstance(GateType);
+                    dynamic gate = Alliases.createGateFromTypeName(pb.type);
                     gate.is_hidden = !pb.visible;
                     gate.gamefieldX = pb.X;
                     gate.gamefieldY = pb.Y;
@@ -222,13 +225,16 @@ public class Level {
             pc.Y = component.gamefieldY;
             pc.output = new();
             foreach (List<Pipe> slot in component.recievers!) {
+            if (slot == null) continue;
             foreach (Pipe con in slot)
             {
                 PlainPipe pp = new();
                 pp.from_slot = con.source_slot;
                 pp.to_slot = con.dest_slot;
-                pp.destination = IDReference[con.dest]; 
-                pc.output.Add(pp);
+                if (IDReference.Keys.Contains(con.dest)) {
+                    pp.destination = IDReference[con.dest]; 
+                    pc.output.Add(pp);
+                }
             }
             }
             pl.body[IDReference[component]] = pc;

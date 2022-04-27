@@ -39,6 +39,220 @@ abstract public class Scene {
     public virtual void resize() {}
 }
 
+public enum LevelEditorMode {DoNothing, SetHidden, RemoveGate, PasteGate, ConnectGates, MoveAround};
+public class LevelEditor : Scene {
+    Levels.Level level;
+    public string selectedType; 
+    TextBox levelName;
+    public LevelEditorMode mode;
+    public GameComponents.BaseGate? connectionTo;
+    public GameComponents.BaseGate? connectionFrom;
+    public int connectionToSlot;
+    public int connectionFromSlot;
+
+    ComboBox gateType;
+    Button backToTheMenuButton;
+    Button pasteGateButton;
+    Button saveAsButton;
+    Button openButton;
+    Button connectButton;
+    Button deleteButton;
+    Button setHiddenButton;
+    Button navButton;
+    LevelEditorViewer viewer;
+    public dynamic getSelectedGateType(){
+        return this.gateType.SelectedItem;
+    }
+    public int optimalScale() {
+        int HoverA = (parent.Height - 100) / (this.level.scheme.getRangeY() + 1);
+        int WoverB = parent.Width / (this.level.scheme.getRangeX() + 1);
+        return (int)((HoverA < WoverB ? HoverA : WoverB) / 1.5);
+    }
+    public void switchToConnect(object sender, EventArgs e) {
+        this.mode = LevelEditorMode.ConnectGates;
+        this.connectButton.BackgroundImage = Textures.button_golden;
+        this.setHiddenButton.BackgroundImage = Textures.bath_tile;
+        this.deleteButton.BackgroundImage = Textures.bath_tile;
+        this.navButton.BackgroundImage = Textures.bath_tile;
+        this.pasteGateButton.BackgroundImage = Textures.bath_tile;
+    }
+    public void switchToSetHidden(object sender, EventArgs e) {
+        this.mode = LevelEditorMode.SetHidden;
+        this.setHiddenButton.BackgroundImage = Textures.button_golden;
+        this.connectButton.BackgroundImage = Textures.bath_tile;
+        this.deleteButton.BackgroundImage = Textures.bath_tile;
+        this.navButton.BackgroundImage = Textures.bath_tile;
+        this.pasteGateButton.BackgroundImage = Textures.bath_tile;
+    }
+    public void switchToDelete(object sender, EventArgs e) {
+        this.mode = LevelEditorMode.RemoveGate;
+        this.deleteButton.BackgroundImage = Textures.button_golden;
+        this.setHiddenButton.BackgroundImage = Textures.bath_tile;
+        this.connectButton.BackgroundImage = Textures.bath_tile;
+        this.navButton.BackgroundImage = Textures.bath_tile;
+        this.pasteGateButton.BackgroundImage = Textures.bath_tile;
+    }
+    public void switchToPaste(object sender, EventArgs e) {
+        this.mode = LevelEditorMode.PasteGate;
+        this.deleteButton.BackgroundImage = Textures.bath_tile;
+        this.setHiddenButton.BackgroundImage = Textures.bath_tile;
+        this.connectButton.BackgroundImage = Textures.bath_tile;
+        this.navButton.BackgroundImage = Textures.bath_tile;
+        this.pasteGateButton.BackgroundImage = Textures.button_golden;
+    }
+
+    public void switchToNav(object sender, EventArgs e) {
+        this.mode = LevelEditorMode.MoveAround;
+        this.deleteButton.BackgroundImage = Textures.bath_tile;
+        this.setHiddenButton.BackgroundImage = Textures.bath_tile;
+        this.connectButton.BackgroundImage = Textures.bath_tile;
+        this.navButton.BackgroundImage = Textures.button_golden;
+        this.pasteGateButton.BackgroundImage = Textures.bath_tile;
+    }
+    public void saveLevelAs(object sender, EventArgs e) {
+        string path ;
+        using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+        {
+            saveFileDialog.InitialDirectory = @"/gamedata/levels";
+            saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+            saveFileDialog.FilterIndex = 1;
+            saveFileDialog.RestoreDirectory = true;
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                path = saveFileDialog.FileName;
+                this.level.levelName = this.levelName.Text;
+                string json = this.level.toJson();
+                System.IO.File.WriteAllText(path, json);
+            }
+        }
+    }
+
+    public void openLevelFrom(object sender, EventArgs e) {
+        string path ;
+        using (OpenFileDialog saveFileDialog = new OpenFileDialog())
+        {
+            saveFileDialog.InitialDirectory = @"/gamedata/levels";
+            saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+            saveFileDialog.FilterIndex = 1;
+            saveFileDialog.RestoreDirectory = true;
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                path = saveFileDialog.FileName;
+                string json = System.IO.File.ReadAllText(path);
+                this.level.fromJson(json, false);
+                this.viewer.Refresh();
+                this.levelName.Text = this.level.levelName;
+            }
+        }
+    }
+    public override void init(SceneManager parent)
+    {
+        base.init(parent);
+
+        this.levelName = new();
+        this.levelName.Location = new(0, 0);
+        this.levelName.Width = 300;
+        this.levelName.Height = 40;
+        this.levelName.Text = "";
+        this.levelName.Font = Textures.small_font; 
+        parent.Controls.Add(this.levelName);
+
+        this.saveAsButton = new();
+        this.saveAsButton.Location = new(300, 0);
+        this.saveAsButton.Width = 150;
+        this.saveAsButton.Height = 40;
+        this.saveAsButton.Text = "Save As";
+        this.saveAsButton.BackgroundImage = Textures.button_green;
+        this.saveAsButton.Font = Textures.big_font;
+        this.saveAsButton.Click += this.saveLevelAs;
+        parent.Controls.Add(this.saveAsButton);
+        this.openButton = new();
+        this.openButton.Location = new(450, 0);
+        this.openButton.Width = 150;
+        this.openButton.Height = 40;
+        this.openButton.Text = "Open";
+        this.openButton.BackgroundImage = Textures.button_green;
+        this.openButton.Font = Textures.big_font;
+        this.openButton.Click += this.openLevelFrom;
+        parent.Controls.Add(this.openButton);
+
+        this.gateType = new();
+        this.gateType.Items.AddRange(GameComponents.Alliases.fullnameMeanings.Keys.ToArray());
+        this.gateType.DropDownStyle = ComboBoxStyle.DropDownList;
+        this.gateType.Location = new(0, 140);
+        this.gateType.Width = 150;
+        this.gateType.Height = 50;
+        this.gateType.SelectedIndexChanged += this.switchToPaste;
+        parent.Controls.Add(this.gateType);
+
+        this.level = new();
+        this.level.init();
+        this.mode = LevelEditorMode.DoNothing;
+
+        this.pasteGateButton = new();
+        this.pasteGateButton.Location = new(0, 40);
+        this.pasteGateButton.Width = 150;
+        this.pasteGateButton.Height = 100;
+        this.pasteGateButton.Text = "+\nPlace gate";
+        this.pasteGateButton.BackgroundImage = Textures.bath_tile;
+        this.pasteGateButton.Font = Textures.big_font;
+        this.pasteGateButton.Click += this.switchToPaste;
+        parent.Controls.Add(this.pasteGateButton);
+
+        this.viewer = new(this);
+        this.viewer.Location = new(0, 190);
+        this.viewer.Width = parent.Width;
+        this.viewer.Height = parent.Height - 190;
+        this.viewer.Anchor = (AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top);
+        this.viewer.configure_raw(10, 10, 100);
+        this.viewer.openLevelRaw(this.level);
+        this.viewer.BackColor = Color.Linen;
+
+        this.navButton = new();
+        this.navButton.Location = new(450, 40);
+        this.navButton.Width = 150;
+        this.navButton.Height = 150;
+        this.navButton.Text = "⬦\nNavigate";
+        this.navButton.BackgroundImage = Textures.bath_tile;
+        this.navButton.Font = Textures.big_font;
+        this.navButton.Click += this.switchToNav;
+        parent.Controls.Add(this.navButton);
+
+        this.connectButton = new();
+        this.connectButton.Location = new(600, 40);
+        this.connectButton.Width = 150;
+        this.connectButton.Height = 150;
+        this.connectButton.Text = "⟷\nConnect gates";
+        this.connectButton.BackgroundImage = Textures.bath_tile;
+        this.connectButton.Font = Textures.big_font;
+        this.connectButton.Click += this.switchToConnect;
+        parent.Controls.Add(this.connectButton);
+
+        this.setHiddenButton = new();
+        this.setHiddenButton.Location = new(150, 40);
+        this.setHiddenButton.Width = 150;
+        this.setHiddenButton.Height = 150;
+        this.setHiddenButton.Text = "?\nSet visibility";
+        this.setHiddenButton.BackgroundImage = Textures.bath_tile;
+        this.setHiddenButton.Font = Textures.big_font;
+        this.setHiddenButton.Click += this.switchToSetHidden;
+        parent.Controls.Add(this.setHiddenButton);
+
+        this.deleteButton = new();
+        this.deleteButton.Location = new(300, 40);
+        this.deleteButton.Width = 150;
+        this.deleteButton.Height = 150;
+        this.deleteButton.Text = "╳\nDelete gate";
+        this.deleteButton.BackgroundImage = Textures.bath_tile;
+        this.deleteButton.Font = Textures.big_font;
+        this.deleteButton.Click += this.switchToDelete;
+        parent.Controls.Add(this.deleteButton);
+
+        parent.Controls.Add(this.viewer);
+    }
+}
 public class GameScene : Scene {
     public GameScene(Levels.Level level) {
         this.level = level;
@@ -445,7 +659,7 @@ public class MenuScene : Scene {
         this.certificateValidator.Height = 100;
         this.certificateValidator.Click += this.certificates;
         this.certificateValidator.BackgroundImage = Textures.button_gray;
-        this.certificateValidator.Text = "Certificate validator";
+        this.certificateValidator.Text = "Level Editor";
         this.certificateValidator.Font = Textures.big_font;
 
         this.exit = new();
@@ -472,8 +686,8 @@ public class MenuScene : Scene {
     }    
 
 
-public void certificates(object sender, EventArgs e) {
-        this.parent.openScene(new CertificateValidationScene());
+    public void certificates(object sender, EventArgs e) {
+        this.parent.openScene(new LevelEditor());
     }   
     public void exitAction(object sender, EventArgs e) {
         this.close();
