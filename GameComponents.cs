@@ -285,6 +285,10 @@ abstract public class BaseGate
         this.delivers = new Pipe[input_slots];
         this.recievers = new List<Pipe>[output_slots];
     }
+
+    ~BaseGate() {
+        
+    }
 }
 
 public class AndGate: BaseGate

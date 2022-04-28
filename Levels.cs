@@ -94,6 +94,17 @@ static class CertificateManager {
         return jsonString;
     }
 
+    static public string[]? certificateInfo(string path) {
+        if (!File.Exists(path)) {
+            return null;
+        }
+        string json = System.IO.File.ReadAllText(path);
+        PlainCertificate pc = JsonSerializer.Deserialize<PlainCertificate>(json);
+        string[] output = new string[2];
+        output[0] = CertificateManager.xorcrypt(pc.owner);
+        output[1] = CertificateManager.xorcrypt(pc.level);
+        return output;
+    }
     static public bool validateCertificate(string path) {
         if (!File.Exists(path)) {
             return false;

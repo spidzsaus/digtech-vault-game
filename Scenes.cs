@@ -147,6 +147,11 @@ public class LevelEditor : Scene {
             }
         }
     }
+    public void backToTheMenu(object sender, EventArgs e) {
+        this.parent.openScene(new MenuScene());
+        parent.player = new System.Media.SoundPlayer(@"resources/menu.wav");
+        parent.player.PlayLooping();
+    }
     public override void init(SceneManager parent)
     {
         base.init(parent);
@@ -249,6 +254,17 @@ public class LevelEditor : Scene {
         this.deleteButton.Font = Textures.big_font;
         this.deleteButton.Click += this.switchToDelete;
         parent.Controls.Add(this.deleteButton);
+
+        this.backToTheMenuButton = new();
+        this.backToTheMenuButton.Anchor = (AnchorStyles.Right | AnchorStyles.Top);
+        this.backToTheMenuButton.Location = new(parent.Width - 150, 0);
+        this.backToTheMenuButton.Width = 150;
+        this.backToTheMenuButton.Height = 40;
+        this.backToTheMenuButton.Text = "Back";
+        this.backToTheMenuButton.Click += this.backToTheMenu;
+        this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
+        this.backToTheMenuButton.Font = Textures.big_font;
+        parent.Controls.Add(this.backToTheMenuButton);
 
         parent.Controls.Add(this.viewer);
     }
@@ -534,79 +550,62 @@ public class CertificateValidationScene : Scene {
     Button openCertificateButton;
     TextBox certificatePathView;
     Button compareButton;
-    Label resultMessage;
+    string[] certificatePaths;
     override public void init(SceneManager parent) {
         base.init(parent);
 
         this.openCertificateButton = new();
         this.openCertificateButton.Anchor = (AnchorStyles.Top);
-        this.openCertificateButton.Location = new(parent.Width / 2 - 300, 350);
-        this.openCertificateButton.Width = 600;
+        this.openCertificateButton.Location = new(parent.Width / 2 - 290, 700);
+        this.openCertificateButton.Width = 300;
         this.openCertificateButton.Height = 100;
         this.openCertificateButton.Click += this.openCertificate;
         this.openCertificateButton.BackgroundImage = Textures.button_gray;
-        this.openCertificateButton.Text = "Select the certificate";
+        this.openCertificateButton.Text = "Select the certificates";
         this.openCertificateButton.Font = Textures.big_font;
 
         this.certificatePathView = new();
-        this.certificatePathView.Anchor = (AnchorStyles.Top);
-        this.certificatePathView.Location = new(parent.Width / 2 - 300, 450);
-        this.certificatePathView.Width = 600;
-        this.certificatePathView.Height = 30;
+        this.certificatePathView.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
+        this.certificatePathView.Multiline = true;
+        this.certificatePathView.Location = new(10, 100);
+        this.certificatePathView.Width = 800;
+        this.certificatePathView.Height = 600;
         this.certificatePathView.Text = "";
         this.certificatePathView.Font = Textures.small_font; 
+        this.certificatePathView.ReadOnly = true;
 
         this.compareButton = new();
         this.compareButton.Anchor = (AnchorStyles.Top);
-        this.compareButton.Location = new(parent.Width / 2 - 300, 600);
-        this.compareButton.Width = 600;
+        this.compareButton.Location = new(parent.Width / 2 + 10, 700);
+        this.compareButton.Width = 300;
         this.compareButton.Height = 100;
         this.compareButton.Click += this.compare;
         this.compareButton.BackgroundImage = Textures.button_green;
         this.compareButton.Text = "Validate";
         this.compareButton.Font = Textures.big_font;
 
-        this.resultMessage = new();
-        this.resultMessage.Anchor = (AnchorStyles.Top);
-        this.resultMessage.Location = new(parent.Width / 2 - 300, 700);
-        this.resultMessage.Width = 600;
-        this.resultMessage.Height = 50;
-        this.resultMessage.Click += this.compare;
-        this.resultMessage.BackgroundImage = Textures.button_gray;
-        this.resultMessage.Text = "Validation result";
-        this.resultMessage.Font = Textures.big_font;
-
-        this.backToTheMenuButton = new();
-        this.backToTheMenuButton.Anchor = (AnchorStyles.Right | AnchorStyles.Top);
-        this.backToTheMenuButton.Location = new(parent.Width - 150, 0);
-        this.backToTheMenuButton.Width = 150;
-        this.backToTheMenuButton.Height = 100;
-        this.backToTheMenuButton.Text = "Back";
-        this.backToTheMenuButton.Click += this.backToTheMenu;
-        this.backToTheMenuButton.BackgroundImage = Textures.button_reddish;
-        this.backToTheMenuButton.Font = Textures.big_font;
-        parent.Controls.Add(this.backToTheMenuButton);
-
         parent.Controls.Add(openCertificateButton);
         parent.Controls.Add(certificatePathView);
         parent.Controls.Add(compareButton);
-        parent.Controls.Add(resultMessage);
     }
     public void backToTheMenu(object sender, EventArgs e) {
         this.parent.openScene(new MenuScene());
     }
 
     void compare(object sender, EventArgs e) {
-        bool result = File.Exists(this.certificatePathView.Text);
-        if (result) {
-            result = Levels.CertificateManager.validateCertificate(this.certificatePathView.Text);
-        }
-        if (result) {
-            this.resultMessage.BackgroundImage = Textures.button_green;
-            this.resultMessage.Text = "Certificate is valid!";
-        } else {
-            this.resultMessage.BackgroundImage = Textures.button_reddish;
-            this.resultMessage.Text = "Certificate is invalid!";
+        this.certificatePathView.Text = "";
+        foreach (var path in certificatePaths)
+        {
+            bool result = File.Exists(path);
+            if (result) {
+                result = Levels.CertificateManager.validateCertificate(path);
+            }
+            if (result) {
+                string[] info = Levels.CertificateManager.certificateInfo(path);
+                this.certificatePathView.Text += path + " is valid! (" + info[0] + "; " + info[1] + ")\r\n";
+            } else {
+                this.certificatePathView.Text += path + " is invalid\r\n";
+            }   
         }
     }
 
@@ -618,10 +617,15 @@ public class CertificateValidationScene : Scene {
             openFileDialog.Filter = "Certificate files (*.certificate)|*.certificate|All files (*.*)|*.*";
             openFileDialog.FilterIndex = 1;
             openFileDialog.RestoreDirectory = true;
+            openFileDialog.Multiselect = true;
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                this.certificatePathView.Text = openFileDialog.FileName;
+                this.certificatePaths = openFileDialog.FileNames;
+            }
+            foreach (var path in this.certificatePaths)
+            {
+                this.certificatePathView.Text += path + "\r\n";
             }
         }
     }

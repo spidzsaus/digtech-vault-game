@@ -180,7 +180,7 @@ public class LevelEditorViewer : RawLevelViewer {
                 isMoving = !isMoving;
                 break;
                 case Scenes.LevelEditorMode.PasteGate:
-                if (component == null) {
+                if (component == null && this.scene.getSelectedGateType() != null) {
                     BaseGate newgate = Alliases.createGateFromTypeFullName(this.scene.getSelectedGateType());
                     newgate.setPosition(componentX, componentY);
                     this.level.scheme.addGate(newgate);
